@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Le Petit Renard — Impara il francese!</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
+<style>
+/* ============================================================
+   LE PETIT RENARD — toybox gouache aesthetic
+   carta crema + card chunky + palette caramella + bordi inchiostro
+   ============================================================ */
+:root{
+  --paper:#FFF6E9;
+  --paper-deep:#FFEDD1;
+  --ink:#3D2B24;
+  --ink-soft:#7A6258;
+  --coral:#FF6B57;
+  --sunflower:#FFC53D;
+  --leaf:#5CB85C;
+  --sky:#4FA8E8;
+  --grape:#9B6BD4;
+  --bubblegum:#F272B0;
+  --white:#FFFFFF;
+  --card-border:3px solid var(--ink);
+  --card-shadow:0 6px 0 rgba(61,43,36,.22);
+  --radius-big:28px;
+  --radius-mid:20px;
+  --font-round:'Fredoka','Baloo 2','Arial Rounded MT Bold','Chalkboard SE','Comic Sans MS','Marker Felt',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--font-round);
+  background:var(--paper);
+  color:var(--ink);
+  overflow-x:hidden;
+  touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;
+}
+/* sfondo: pois giganti tenui, stile carta da gioco */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255,197,61,.16) 0 90px, transparent 91px),
+    radial-gradient(circle at 85% 12%, rgba(79,168,232,.13) 0 70px, transparent 71px),
+    radial-gradient(circle at 90% 78%, rgba(242,114,176,.12) 0 110px, transparent 111px),
+    radial-gradient(circle at 8% 85%, rgba(92,184,92,.13) 0 80px, transparent 81px),
+    radial-gradient(circle at 50% 50%, rgba(155,107,212,.07) 0 140px, transparent 141px);
+}
+#app{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:14px;min-height:100%}
+
+.screen{display:none;animation:screenIn .35s cubic-bezier(.22,1.4,.36,1)}
+.screen.active{display:block}
+@keyframes screenIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+
+/* ---------- bottoni base ---------- */
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--white);border:var(--card-border);border-radius:var(--radius-mid);
+  box-shadow:var(--card-shadow);
+  font-size:1.15rem;font-weight:700;padding:12px 22px;
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), box-shadow .12s;
+}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(61,43,36,.22)}
+.btn.primary{background:var(--coral);color:#fff}
+.btn.sun{background:var(--sunflower)}
+.btn.round{width:58px;height:58px;padding:0;border-radius:50%;font-size:1.6rem}
+.btn.small{font-size:1rem;padding:8px 16px;box-shadow:0 4px 0 rgba(61,43,36,.22)}
+
+/* ---------- header ---------- */
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.topbar .spacer{flex:1}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;background:var(--white);
+  border:var(--card-border);border-radius:999px;padding:8px 16px;
+  font-weight:700;font-size:1.05rem;box-shadow:var(--card-shadow);
+}
+.chip .star{color:#E8A400}
+
+/* ---------- mascotte + fumetto ---------- */
+.mascot-row{display:flex;align-items:flex-end;gap:12px;margin:6px 0 20px}
+.mascot{font-size:3.4rem;line-height:1;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18));animation:idleBob 3s ease-in-out infinite;transform-origin:bottom center}
+@keyframes idleBob{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(-4px)}}
+.bubble{
+  position:relative;background:var(--white);border:var(--card-border);
+  border-radius:var(--radius-mid);padding:12px 18px;font-size:1.1rem;font-weight:600;
+  box-shadow:var(--card-shadow);max-width:520px;
+}
+.bubble::before{
+  content:"";position:absolute;left:-14px;bottom:16px;width:16px;height:16px;
+  background:var(--white);border-left:var(--card-border);border-bottom:var(--card-border);
+  transform:rotate(45deg);
+}
+
+/* ---------- titolo app ---------- */
+.app-title{text-align:center;margin:10px 0 4px;font-size:2rem;letter-spacing:.5px}
+.app-title .fr{color:var(--coral)}
+.app-sub{text-align:center;color:var(--ink-soft);font-weight:600;margin-bottom:22px}
+
+/* ---------- profili ---------- */
+.profile-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:22px}
+.profile-card{
+  width:150px;background:var(--white);border:var(--card-border);border-radius:var(--radius-big);
+  box-shadow:var(--card-shadow);padding:18px 12px;text-align:center;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1);
+}
+.profile-card:active{transform:scale(.94)}
+.profile-card .face{font-size:3.2rem;line-height:1.2}
+.profile-card .pname{font-weight:700;font-size:1.15rem;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-card .pstars{color:#E8A400;font-weight:700;margin-top:2px}
+.profile-card.new{background:var(--paper-deep);border-style:dashed}
+.avatar-pick{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:14px 0}
+.avatar-pick button{
+  font-size:2.6rem;width:74px;height:74px;border-radius:50%;background:var(--white);
+  border:var(--card-border);box-shadow:var(--card-shadow);transition:transform .15s;
+}
+.avatar-pick button.sel{background:var(--sunflower);transform:scale(1.12)}
+.name-input{
+  display:block;margin:0 auto;font-family:inherit;font-size:1.3rem;font-weight:700;text-align:center;
+  border:var(--card-border);border-radius:var(--radius-mid);padding:12px;width:min(320px,90%);
+  background:var(--white);color:var(--ink);outline:none;
+}
+.mode-pick{display:flex;gap:14px;justify-content:center;margin:18px 0;flex-wrap:wrap}
+.mode-pick button{
+  background:var(--white);border:var(--card-border);border-radius:var(--radius-big);
+  box-shadow:var(--card-shadow);padding:16px 20px;font-size:1.05rem;font-weight:700;width:220px;
+}
+.mode-pick button .big{display:block;font-size:2.2rem;margin-bottom:6px}
+.mode-pick button.sel{background:var(--leaf);color:#fff}
+.form-step{text-align:center;margin-bottom:8px;font-weight:700;font-size:1.2rem}
+
+/* ---------- mappa unità ---------- */
+.unit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.unit-card{
+  position:relative;border:var(--card-border);border-radius:var(--radius-big);
+  box-shadow:var(--card-shadow);padding:18px 12px 14px;text-align:center;color:#fff;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1);overflow:hidden;
+}
+.unit-card:active{transform:scale(.94)}
+.unit-card .uemoji{font-size:3rem;line-height:1.2;filter:drop-shadow(0 3px 0 rgba(0,0,0,.18))}
+.unit-card .ufr{font-weight:700;font-size:1.2rem;margin-top:6px;text-shadow:0 2px 0 rgba(0,0,0,.18)}
+.unit-card .uit{font-size:.92rem;font-weight:600;opacity:.92}
+.unit-card .ustars{margin-top:8px;font-size:1rem;letter-spacing:2px}
+.unit-card .sticker-won{
+  position:absolute;top:8px;right:8px;font-size:1.5rem;
+  animation:stickerPop .5s cubic-bezier(.34,1.8,.64,1);
+}
+@keyframes stickerPop{from{transform:scale(0) rotate(-40deg)}to{transform:scale(1) rotate(12deg)}}
+
+/* ---------- pagina unità: giochi ---------- */
+.game-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:18px}
+.game-card{
+  background:var(--white);border:var(--card-border);border-radius:var(--radius-big);
+  box-shadow:var(--card-shadow);padding:20px 14px;text-align:center;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1);
+}
+.game-card:active{transform:scale(.94)}
+.game-card .gemoji{font-size:2.6rem}
+.game-card .gname{font-weight:700;font-size:1.25rem;margin-top:6px}
+.game-card .gsub{color:var(--ink-soft);font-size:.9rem;font-weight:600}
+.game-card .gstars{margin-top:8px;font-size:1.15rem;letter-spacing:3px;color:#E8A400}
+.unit-hero{text-align:center;margin:6px 0 4px}
+.unit-hero .uemoji{font-size:4rem;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18))}
+.unit-hero h2{font-size:2rem}
+.unit-hero .uit{color:var(--ink-soft);font-weight:600}
+
+/* ---------- area gioco ---------- */
+.game-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.progress-dots{flex:1;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.pdot{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--ink);background:var(--white);transition:background .2s, transform .2s}
+.pdot.done{background:var(--leaf);transform:scale(1.15)}
+.pdot.bad{background:var(--coral)}
+.prompt-zone{text-align:center;margin:10px 0 20px}
+.prompt-zone .big-audio{
+  width:96px;height:96px;border-radius:50%;font-size:2.6rem;background:var(--sunflower);
+  border:var(--card-border);box-shadow:var(--card-shadow);
+  animation:pulseGlow 1.6s ease-in-out infinite;
+}
+@keyframes pulseGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.prompt-zone .hint{margin-top:10px;font-weight:700;font-size:1.3rem}
+.prompt-zone .hint .fr-word{color:var(--coral);font-size:1.5rem}
+.prompt-emoji{font-size:5rem;line-height:1.15;filter:drop-shadow(0 4px 0 rgba(61,43,36,.15))}
+
+.card-grid{display:grid;gap:14px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:600px){.card-grid.g4{grid-template-columns:repeat(4,1fr)}.card-grid.g3{grid-template-columns:repeat(3,1fr)}}
+.word-card{
+  position:relative;background:var(--white);border:var(--card-border);border-radius:var(--radius-big);
+  box-shadow:var(--card-shadow);padding:18px 10px;text-align:center;min-height:120px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), opacity .25s, background .25s;
+  font-size:1.05rem;
+}
+.word-card:active{transform:scale(.93)}
+.word-card .wemoji{font-size:3rem;line-height:1.15}
+.word-card .wswatch{width:58px;height:58px;border-radius:50%;border:var(--card-border)}
+.word-card .wdigit{font-size:3rem;font-weight:700;line-height:1.1}
+.word-card .wdots{font-size:.95rem;letter-spacing:1px;line-height:1.2;max-width:110px}
+.word-card .wlabel{font-weight:700;font-size:1.12rem}
+.word-card .wlabel-it{font-size:.85rem;color:var(--ink-soft);font-weight:600}
+.word-card.correct{background:var(--leaf);color:#fff;animation:winBounce .6s cubic-bezier(.34,1.8,.64,1)}
+.word-card.correct .wlabel-it{color:#eaffea}
+.word-card.wrong{animation:shakeNo .45s;background:#FFD9D3}
+.word-card.dim{opacity:.35;pointer-events:none}
+.word-card.heard{outline:4px solid var(--sunflower);outline-offset:-4px}
+.word-card.heard::after{content:"⭐";position:absolute;top:6px;right:8px;font-size:1.1rem}
+@keyframes winBounce{0%{transform:scale(1)}35%{transform:scale(1.14) rotate(-3deg)}70%{transform:scale(.96) rotate(2deg)}100%{transform:scale(1)}}
+@keyframes shakeNo{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+/* ---------- memory ---------- */
+.mem-grid{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
+@media(min-width:520px){.mem-grid{grid-template-columns:repeat(4,1fr)}}
+.mem-card{perspective:600px;aspect-ratio:1/1.05}
+.mem-inner{
+  position:relative;width:100%;height:100%;transform-style:preserve-3d;
+  transition:transform .4s cubic-bezier(.34,1.4,.64,1);
+}
+.mem-card.flip .mem-inner{transform:rotateY(180deg)}
+.mem-face{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border:var(--card-border);border-radius:var(--radius-mid);box-shadow:0 4px 0 rgba(61,43,36,.2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+.mem-front{background:var(--sky);color:#fff;font-size:2rem}
+.mem-front::after{content:"?";font-weight:700;text-shadow:0 2px 0 rgba(0,0,0,.2)}
+.mem-back{background:var(--white);transform:rotateY(180deg);font-size:2.1rem;padding:4px}
+.mem-back .mword{font-size:.98rem;font-weight:700;text-align:center;line-height:1.1}
+.mem-back .mswatch{width:44px;height:44px;border-radius:50%;border:var(--card-border)}
+.mem-card.matched .mem-inner{animation:winBounce .6s}
+.mem-card.matched .mem-back{background:#E4F7E4;border-color:var(--leaf)}
+
+/* ---------- schermata vittoria ---------- */
+.win-zone{text-align:center;padding:30px 10px}
+.win-zone .wmascot{font-size:5rem;display:inline-block;animation:winDance .8s cubic-bezier(.34,1.56,.64,1) infinite alternate}
+@keyframes winDance{from{transform:rotate(-8deg) translateY(0)}to{transform:rotate(8deg) translateY(-12px)}}
+.win-zone h2{font-size:2rem;margin:12px 0 4px}
+.win-zone .wstars{font-size:3rem;letter-spacing:8px;margin:10px 0}
+.win-zone .wstars span{display:inline-block;opacity:0;transform:scale(0)}
+.win-zone .wstars span.on{animation:starPop .5s cubic-bezier(.34,1.8,.64,1) forwards}
+@keyframes starPop{to{opacity:1;transform:scale(1)}}
+.win-actions{display:flex;gap:14px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+
+/* ---------- album figurine ---------- */
+.sticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px;margin-top:16px}
+.sticker-slot{
+  background:var(--white);border:var(--card-border);border-radius:var(--radius-big);
+  box-shadow:var(--card-shadow);aspect-ratio:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;text-align:center;padding:8px;
+}
+.sticker-slot.locked{background:var(--paper-deep);border-style:dashed;box-shadow:none}
+.sticker-slot .semoji{font-size:2.8rem}
+.sticker-slot.locked .semoji{filter:grayscale(1);opacity:.35}
+.sticker-slot .sname{font-weight:700;font-size:.95rem}
+.sticker-slot.locked .sname{color:var(--ink-soft)}
+.sticker-slot:not(.locked){transform:rotate(-2deg)}
+.sticker-slot:not(.locked):nth-child(even){transform:rotate(2deg)}
+
+/* ---------- coriandoli ---------- */
+.confetto{position:fixed;top:-20px;z-index:99;pointer-events:none;font-size:1.4rem;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.confetto.shape{width:12px;height:12px;border-radius:3px;font-size:0}
+
+/* ---------- responsive piccoli ---------- */
+@media(max-width:420px){
+  .app-title{font-size:1.6rem}
+  .word-card .wemoji{font-size:2.4rem}
+  .prompt-emoji{font-size:4rem}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ==================== PROFILI ==================== -->
+  <section id="screen-profiles" class="screen">
+    <h1 class="app-title">🦊 Le Petit Renard <span class="fr">· Français!</span></h1>
+    <p class="app-sub">Chi gioca oggi?</p>
+    <div class="profile-grid" id="profileList"></div>
+  </section>
+
+  <!-- ==================== NUOVO PROFILO ==================== -->
+  <section id="screen-newprofile" class="screen">
+    <div class="topbar">
+      <button class="btn round" id="npBack">⬅️</button>
+    </div>
+    <h1 class="app-title">Crea il tuo personaggio</h1>
+    <p class="form-step">1 · Scegli chi sei</p>
+    <div class="avatar-pick" id="avatarPick"></div>
+    <p class="form-step">2 · Scrivi il tuo nome</p>
+    <input class="name-input" id="nameInput" maxlength="12" placeholder="Il tuo nome…" autocomplete="off">
+    <p class="form-step" style="margin-top:18px">3 · Come vuoi giocare?</p>
+    <div class="mode-pick" id="modePick">
+      <button data-mode="listen"><span class="big">👂</span>Solo ascolto<br><small>per i più piccoli</small></button>
+      <button data-mode="read"><span class="big">📖</span>Ascolto + lettura<br><small>per chi sa leggere</small></button>
+    </div>
+    <div style="text-align:center;margin-top:10px">
+      <button class="btn primary" id="npCreate" style="font-size:1.3rem">✨ Via si gioca!</button>
+    </div>
+  </section>
+
+  <!-- ==================== HOME / MAPPA ==================== -->
+  <section id="screen-home" class="screen">
+    <div class="topbar">
+      <button class="chip" id="homeProfile">🦊 …</button>
+      <span class="spacer"></span>
+      <button class="chip" id="homeStars"><span class="star">⭐</span> 0</button>
+      <button class="btn round sun" id="homeStickers" title="Album figurine">🏆</button>
+    </div>
+    <div class="mascot-row">
+      <div class="mascot" id="homeMascot">🦊</div>
+      <div class="bubble" id="homeBubble">Salut! Scegli un mondo e impariamo il francese!</div>
+    </div>
+    <div class="unit-grid" id="unitGrid"></div>
+  </section>
+
+  <!-- ==================== UNITÀ ==================== -->
+  <section id="screen-unit" class="screen">
+    <div class="topbar">
+      <button class="btn round" id="unitBack">⬅️</button>
+      <span class="spacer"></span>
+      <button class="chip" id="unitStarChip"><span class="star">⭐</span> 0</button>
+    </div>
+    <div class="unit-hero" id="unitHero"></div>
+    <div class="game-list" id="gameList"></div>
+  </section>
+
+  <!-- ==================== GIOCO ==================== -->
+  <section id="screen-game" class="screen">
+    <div class="game-head">
+      <button class="btn round" id="gameBack">⬅️</button>
+      <div class="progress-dots" id="gameDots"></div>
+      <button class="btn round sun" id="gameRepeat" title="Riascolta">🔊</button>
+    </div>
+    <div id="gameArea"></div>
+  </section>
+
+  <!-- ==================== ALBUM ==================== -->
+  <section id="screen-stickers" class="screen">
+    <div class="topbar">
+      <button class="btn round" id="stickBack">⬅️</button>
+      <span class="spacer"></span>
+    </div>
+    <h1 class="app-title">🏆 Album delle figurine</h1>
+    <p class="app-sub">Completa un mondo per vincere la sua figurina!</p>
+    <div class="sticker-grid" id="stickerGrid"></div>
+  </section>
+
+</div>
+<script>
+"use strict";
+/* ============================================================
+   DATI — 8 unità × ~10 parole, audio via Web Speech API (fr-FR)
+   ============================================================ */
+const UNITS = [
+  {
+    id:"animaux", emoji:"🦁", fr:"Les animaux", it:"Gli animali", color:"#FF8A3D",
+    words:[
+      {fr:"le chien", it:"il cane", e:"🐶"},
+      {fr:"le chat", it:"il gatto", e:"🐱"},
+      {fr:"le lion", it:"il leone", e:"🦁"},
+      {fr:"l'éléphant", it:"l'elefante", e:"🐘"},
+      {fr:"le singe", it:"la scimmia", e:"🐵"},
+      {fr:"l'oiseau", it:"l'uccello", e:"🐦"},
+      {fr:"le poisson", it:"il pesce", e:"🐟"},
+      {fr:"le lapin", it:"il coniglio", e:"🐰"},
+      {fr:"la vache", it:"la mucca", e:"🐮"},
+      {fr:"le cheval", it:"il cavallo", e:"🐴"},
+    ]
+  },
+  {
+    id:"couleurs", emoji:"🎨", fr:"Les couleurs", it:"I colori", color:"#F272B0",
+    words:[
+      {fr:"rouge", it:"rosso", hex:"#E53935"},
+      {fr:"bleu", it:"blu", hex:"#1E6FD9"},
+      {fr:"jaune", it:"giallo", hex:"#FFD226"},
+      {fr:"vert", it:"verde", hex:"#43A047"},
+      {fr:"orange", it:"arancione", hex:"#FB8C00"},
+      {fr:"violet", it:"viola", hex:"#8E4EC6"},
+      {fr:"rose", it:"rosa", hex:"#F48FB1"},
+      {fr:"noir", it:"nero", hex:"#26211F"},
+      {fr:"blanc", it:"bianco", hex:"#FDFDF6"},
+      {fr:"marron", it:"marrone", hex:"#795548"},
+    ]
+  },
+  {
+    id:"nombres", emoji:"🔢", fr:"Les nombres", it:"I numeri", color:"#4FA8E8",
+    words:[
+      {fr:"un", it:"uno", n:1},{fr:"deux", it:"due", n:2},{fr:"trois", it:"tre", n:3},
+      {fr:"quatre", it:"quattro", n:4},{fr:"cinq", it:"cinque", n:5},{fr:"six", it:"sei", n:6},
+      {fr:"sept", it:"sette", n:7},{fr:"huit", it:"otto", n:8},{fr:"neuf", it:"nove", n:9},
+      {fr:"dix", it:"dieci", n:10},
+    ]
+  },
+  {
+    id:"nourriture", emoji:"🍎", fr:"La nourriture", it:"Il cibo", color:"#E5484D",
+    words:[
+      {fr:"la pomme", it:"la mela", e:"🍎"},
+      {fr:"la banane", it:"la banana", e:"🍌"},
+      {fr:"le pain", it:"il pane", e:"🥖"},
+      {fr:"le fromage", it:"il formaggio", e:"🧀"},
+      {fr:"le lait", it:"il latte", e:"🥛"},
+      {fr:"le gâteau", it:"la torta", e:"🎂"},
+      {fr:"l'œuf", it:"l'uovo", e:"🥚"},
+      {fr:"la fraise", it:"la fragola", e:"🍓"},
+      {fr:"la glace", it:"il gelato", e:"🍦"},
+      {fr:"le poulet", it:"il pollo", e:"🍗"},
+    ]
+  },
+  {
+    id:"corps", emoji:"👀", fr:"Le corps", it:"Il corpo", color:"#9B6BD4",
+    words:[
+      {fr:"les yeux", it:"gli occhi", e:"👀"},
+      {fr:"le nez", it:"il naso", e:"👃"},
+      {fr:"la bouche", it:"la bocca", e:"👄"},
+      {fr:"l'oreille", it:"l'orecchio", e:"👂"},
+      {fr:"la main", it:"la mano", e:"✋"},
+      {fr:"le pied", it:"il piede", e:"🦶"},
+      {fr:"le bras", it:"il braccio", e:"💪"},
+      {fr:"la jambe", it:"la gamba", e:"🦵"},
+      {fr:"la dent", it:"il dente", e:"🦷"},
+      {fr:"la langue", it:"la lingua", e:"👅"},
+    ]
+  },
+  {
+    id:"famille", emoji:"👨‍👩‍👧‍👦", fr:"La famille", it:"La famiglia", color:"#5CB85C",
+    words:[
+      {fr:"le papa", it:"il papà", e:"👨"},
+      {fr:"la maman", it:"la mamma", e:"👩"},
+      {fr:"le frère", it:"il fratello", e:"👦"},
+      {fr:"la sœur", it:"la sorella", e:"👧"},
+      {fr:"le bébé", it:"il bebè", e:"👶"},
+      {fr:"le grand-père", it:"il nonno", e:"👴"},
+      {fr:"la grand-mère", it:"la nonna", e:"👵"},
+      {fr:"la famille", it:"la famiglia", e:"👨‍👩‍👧‍👦"},
+    ]
+  },
+  {
+    id:"vetements", emoji:"👕", fr:"Les vêtements", it:"I vestiti", color:"#00A2A7",
+    words:[
+      {fr:"le t-shirt", it:"la maglietta", e:"👕"},
+      {fr:"le pantalon", it:"i pantaloni", e:"👖"},
+      {fr:"la robe", it:"il vestito", e:"👗"},
+      {fr:"le chapeau", it:"il cappello", e:"🎩"},
+      {fr:"les chaussures", it:"le scarpe", e:"👟"},
+      {fr:"les chaussettes", it:"i calzini", e:"🧦"},
+      {fr:"le manteau", it:"il cappotto", e:"🧥"},
+      {fr:"l'écharpe", it:"la sciarpa", e:"🧣"},
+      {fr:"les gants", it:"i guanti", e:"🧤"},
+    ]
+  },
+  {
+    id:"salutations", emoji:"👋", fr:"Les mots magiques", it:"Le parole magiche", color:"#FFC53D",
+    words:[
+      {fr:"bonjour", it:"buongiorno", e:"☀️"},
+      {fr:"au revoir", it:"arrivederci", e:"👋"},
+      {fr:"merci", it:"grazie", e:"🙏"},
+      {fr:"s'il te plaît", it:"per favore", e:"🥺"},
+      {fr:"oui", it:"sì", e:"👍"},
+      {fr:"non", it:"no", e:"👎"},
+      {fr:"bonne nuit", it:"buonanotte", e:"🌙"},
+      {fr:"je t'aime", it:"ti voglio bene", e:"❤️"},
+    ]
+  },
+];
+
+const AVATARS = ["🦊","🐸","🐼","🦄","🐯","🐙"];
+const GAMES = [
+  {id:"explore", emoji:"🔍", name:"Scopri", sub:"Tocca e ascolta le parole"},
+  {id:"find",    emoji:"👂", name:"Trova!", sub:"Ascolta e tocca quella giusta"},
+  {id:"memory",  emoji:"🃏", name:"Memory", sub:"Trova le coppie"},
+  {id:"read",    emoji:"📖", name:"Leggi", sub:"Abbina la parola scritta", readerOnly:true},
+];
+const STICKER_THRESHOLD = 6; // stelle nell'unità per vincere la figurina
+
+/* ============================================================
+   STATO + STORAGE (immutabile: ogni update crea nuovo oggetto)
+   ============================================================ */
+const STORAGE_KEY = "petitrenard_v1";
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return {profiles:[], activeId:null};
+    const parsed = JSON.parse(raw);
+    if(!parsed || !Array.isArray(parsed.profiles)) return {profiles:[], activeId:null};
+    return parsed;
+  }catch(e){ return {profiles:[], activeId:null}; }
+}
+let state = loadState();
+
+function setState(next){
+  state = next;
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+function activeProfile(){
+  return state.profiles.find(p => p.id === state.activeId) || null;
+}
+function updateProfile(patch){
+  const next = {
+    ...state,
+    profiles: state.profiles.map(p => p.id === state.activeId ? {...p, ...patch} : p)
+  };
+  setState(next);
+}
+function setStars(unitId, gameId, stars){
+  const p = activeProfile(); if(!p) return;
+  const unitScores = {...(p.scores[unitId] || {})};
+  unitScores[gameId] = Math.max(unitScores[gameId] || 0, stars);
+  updateProfile({scores: {...p.scores, [unitId]: unitScores}});
+}
+function unitStars(p, unitId){
+  const s = p.scores[unitId] || {};
+  return Object.values(s).reduce((a,b)=>a+b,0);
+}
+function totalStars(p){
+  return UNITS.reduce((sum,u)=>sum+unitStars(p,u.id),0);
+}
+function hasSticker(p, unitId){ return unitStars(p, unitId) >= STICKER_THRESHOLD; }
+
+/* ============================================================
+   AUDIO — Web Speech API (francese) + effetti WebAudio
+   ============================================================ */
+let frVoice = null, itVoice = null;
+function pickVoices(){
+  const vs = speechSynthesis.getVoices();
+  if(!vs.length) return;
+  const frAll = vs.filter(v=>v.lang && v.lang.toLowerCase().startsWith("fr"));
+  // preferenza: fr-FR, voci "premium/enhanced" prima
+  const score = v => (v.lang.toLowerCase()==="fr-fr"?10:0) + (/thomas|am[eé]lie|audrey|aurelie|premium|enhanced|natural/i.test(v.name)?5:0) + (v.localService?1:0);
+  frVoice = frAll.sort((a,b)=>score(b)-score(a))[0] || null;
+  itVoice = vs.find(v=>v.lang && v.lang.toLowerCase().startsWith("it")) || null;
+}
+if("speechSynthesis" in window){
+  pickVoices();
+  speechSynthesis.onvoiceschanged = pickVoices;
+}
+
+let lastSpeakText = "";
+function speak(text, opts = {}){
+  if(!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = opts.lang || "fr-FR";
+  if(u.lang.startsWith("fr") && frVoice) u.voice = frVoice;
+  if(u.lang.startsWith("it") && itVoice) u.voice = itVoice;
+  u.rate = opts.rate || 0.82;   // lento, per bambini
+  u.pitch = opts.pitch || 1.05;
+  if(!opts.noRepeat) lastSpeakText = u.lang.startsWith("fr") ? text : lastSpeakText;
+  speechSynthesis.speak(u);
+}
+
+let audioCtx = null;
+function ctx(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(AC) audioCtx = new AC();
+  }
+  if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq, start, dur, type="sine", vol=0.18){
+  const c = ctx(); if(!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, c.currentTime + start);
+  g.gain.linearRampToValueAtTime(vol, c.currentTime + start + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + start + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(c.currentTime + start); o.stop(c.currentTime + start + dur + 0.05);
+}
+const sfx = {
+  tap:   () => tone(520, 0, .08, "triangle", .1),
+  good:  () => { tone(660,0,.12,"triangle"); tone(880,.11,.2,"triangle"); },
+  bad:   () => tone(160, 0, .25, "square", .08),
+  flip:  () => tone(420, 0, .07, "sine", .1),
+  win:   () => { [523,659,784,1047].forEach((f,i)=>tone(f, i*.13, .22, "triangle")); },
+  star:  () => { tone(1200,0,.1,"sine",.12); tone(1600,.08,.15,"sine",.12); },
+};
+
+/* ============================================================
+   CORIANDOLI
+   ============================================================ */
+const CONFETTI_COLORS = ["#FF6B57","#FFC53D","#5CB85C","#4FA8E8","#9B6BD4","#F272B0"];
+function confetti(n = 36, emojis = null){
+  for(let i=0;i<n;i++){
+    const el = document.createElement("div");
+    el.className = "confetto" + (emojis ? "" : " shape");
+    if(emojis) el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    else el.style.background = CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
+    el.style.left = Math.random()*100 + "vw";
+    el.style.animationDuration = (1.6 + Math.random()*1.6) + "s";
+    el.style.animationDelay = (Math.random()*0.5) + "s";
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 4000);
+  }
+}
+
+/* ============================================================
+   HELPERS UI
+   ============================================================ */
+const $ = id => document.getElementById(id);
+function show(screenId){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  const el = $(screenId);
+  el.classList.remove("active");
+  void el.offsetWidth; // riavvia animazione ingresso
+  el.classList.add("active");
+  window.scrollTo(0,0);
+}
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function starsStr(n, max=3){
+  return "⭐".repeat(n) + "☆".repeat(Math.max(0,max-n));
+}
+function wordVisual(w, cls="wemoji"){
+  if(w.e) return `<div class="${cls}">${w.e}</div>`;
+  if(w.hex) return `<div class="${cls==="wemoji"?"wswatch":"mswatch"}" style="background:${w.hex}"></div>`;
+  if(w.n) return `<div class="${cls==="wemoji"?"wdigit":"mword"}" style="font-size:${cls==="wemoji"?"":"1.6rem"}">${w.n}</div>`;
+  return "";
+}
+
+/* ============================================================
+   SCHERMATA PROFILI
+   ============================================================ */
+function renderProfiles(){
+  const list = $("profileList");
+  list.innerHTML = "";
+  state.profiles.forEach(p=>{
+    const card = document.createElement("button");
+    card.className = "profile-card";
+    card.innerHTML = `<div class="face">${p.avatar}</div><div class="pname">${escapeHtml(p.name)}</div><div class="pstars">⭐ ${totalStars(p)}</div>`;
+    card.onclick = ()=>{
+      sfx.tap();
+      setState({...state, activeId: p.id});
+      goHome(true);
+    };
+    list.appendChild(card);
+  });
+  if(state.profiles.length < 4){
+    const add = document.createElement("button");
+    add.className = "profile-card new";
+    add.innerHTML = `<div class="face">➕</div><div class="pname">Nuovo</div><div class="pstars">&nbsp;</div>`;
+    add.onclick = ()=>{ sfx.tap(); openNewProfile(); };
+    list.appendChild(add);
+  }
+  show("screen-profiles");
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* ---------- nuovo profilo ---------- */
+let npAvatar = AVATARS[0], npMode = "listen";
+function openNewProfile(){
+  npAvatar = AVATARS[Math.floor(Math.random()*AVATARS.length)];
+  npMode = "listen";
+  const pick = $("avatarPick");
+  pick.innerHTML = "";
+  AVATARS.forEach(a=>{
+    const b = document.createElement("button");
+    b.textContent = a;
+    if(a===npAvatar) b.classList.add("sel");
+    b.onclick = ()=>{
+      sfx.tap();
+      npAvatar = a;
+      pick.querySelectorAll("button").forEach(x=>x.classList.toggle("sel", x===b));
+    };
+    pick.appendChild(b);
+  });
+  $("nameInput").value = "";
+  $("modePick").querySelectorAll("button").forEach(b=>{
+    b.classList.toggle("sel", b.dataset.mode===npMode);
+  });
+  show("screen-newprofile");
+}
+$("modePick").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-mode]"); if(!b) return;
+  sfx.tap();
+  npMode = b.dataset.mode;
+  $("modePick").querySelectorAll("button").forEach(x=>x.classList.toggle("sel", x===b));
+});
+$("npBack").onclick = ()=>{ sfx.tap(); renderProfiles(); };
+$("npCreate").onclick = ()=>{
+  const name = $("nameInput").value.trim() || "Petit chef";
+  const p = {
+    id: "p" + Math.random().toString(36).slice(2,9),
+    name, avatar: npAvatar, mode: npMode, scores: {}
+  };
+  setState({...state, profiles:[...state.profiles, p], activeId: p.id});
+  sfx.win(); confetti(24);
+  goHome(true);
+};
+
+/* ============================================================
+   HOME
+   ============================================================ */
+const HOME_PHRASES = [
+  "Salut! Scegli un mondo e giochiamo!",
+  "Bonjour! Oggi che mondo esploriamo?",
+  "Ogni gioco vinto = stelle! ⭐",
+  "Vinci 6 stelle in un mondo per la figurina! 🏆",
+];
+function goHome(greet){
+  const p = activeProfile();
+  if(!p){ renderProfiles(); return; }
+  $("homeProfile").innerHTML = `${p.avatar} ${escapeHtml(p.name)}`;
+  $("homeStars").innerHTML = `<span class="star">⭐</span> ${totalStars(p)}`;
+  $("homeBubble").textContent = HOME_PHRASES[Math.floor(Math.random()*HOME_PHRASES.length)];
+  const grid = $("unitGrid");
+  grid.innerHTML = "";
+  UNITS.forEach(u=>{
+    const stars = unitStars(p, u.id);
+    const maxStars = availableGames(p).length * 3;
+    const card = document.createElement("button");
+    card.className = "unit-card";
+    card.style.background = u.color;
+    card.innerHTML = `
+      ${hasSticker(p,u.id) ? '<div class="sticker-won">🏆</div>' : ''}
+      <div class="uemoji">${u.emoji}</div>
+      <div class="ufr">${u.fr}</div>
+      <div class="uit">${u.it}</div>
+      <div class="ustars">⭐ ${stars}/${maxStars}</div>`;
+    card.onclick = ()=>{ sfx.tap(); openUnit(u.id); };
+    grid.appendChild(card);
+  });
+  show("screen-home");
+  if(greet) speak("Salut !", {rate:0.9});
+}
+$("homeProfile").onclick = ()=>{ sfx.tap(); renderProfiles(); };
+$("homeStickers").onclick = ()=>{ sfx.tap(); renderStickers(); };
+
+/* ============================================================
+   UNITÀ
+   ============================================================ */
+let currentUnit = null;
+function availableGames(p){
+  return GAMES.filter(g => !g.readerOnly || p.mode === "read");
+}
+function openUnit(unitId){
+  const p = activeProfile(); if(!p) return renderProfiles();
+  currentUnit = UNITS.find(u=>u.id===unitId);
+  const u = currentUnit;
+  $("unitHero").innerHTML = `
+    <div class="uemoji">${u.emoji}</div>
+    <h2 style="color:${u.color}">${u.fr}</h2>
+    <div class="uit">${u.it}</div>`;
+  $("unitStarChip").innerHTML = `<span class="star">⭐</span> ${unitStars(p,u.id)}`;
+  const list = $("gameList");
+  list.innerHTML = "";
+  availableGames(p).forEach(g=>{
+    const got = (p.scores[u.id]||{})[g.id] || 0;
+    const card = document.createElement("button");
+    card.className = "game-card";
+    card.innerHTML = `
+      <div class="gemoji">${g.emoji}</div>
+      <div class="gname">${g.name}</div>
+      <div class="gsub">${g.sub}</div>
+      <div class="gstars">${starsStr(got)}</div>`;
+    card.onclick = ()=>{ sfx.tap(); startGame(g.id); };
+    list.appendChild(card);
+  });
+  show("screen-unit");
+  speak(u.fr, {rate:0.85});
+}
+$("unitBack").onclick = ()=>{ sfx.tap(); goHome(false); };
+
+/* ============================================================
+   MOTORE GIOCHI
+   ============================================================ */
+let game = null; // stato del gioco corrente
+
+$("gameBack").onclick = ()=>{
+  sfx.tap();
+  speechSynthesis.cancel();
+  openUnit(currentUnit.id);
+};
+$("gameRepeat").onclick = ()=>{
+  if(lastSpeakText) speak(lastSpeakText);
+};
+
+function startGame(gameId){
+  const p = activeProfile();
+  const u = currentUnit;
+  if(gameId === "explore") startExplore(u);
+  else if(gameId === "find") startFind(u, p);
+  else if(gameId === "memory") startMemory(u, p);
+  else if(gameId === "read") startRead(u);
+  show("screen-game");
+}
+function setDots(total, doneArr){
+  const dots = $("gameDots");
+  dots.innerHTML = "";
+  for(let i=0;i<total;i++){
+    const d = document.createElement("div");
+    d.className = "pdot" + (doneArr[i]==="ok" ? " done" : doneArr[i]==="bad" ? " bad" : "");
+    dots.appendChild(d);
+  }
+}
+
+/* ---------- GIOCO 1: Scopri (tocca e ascolta) ---------- */
+function startExplore(u){
+  const heard = new Set();
+  setDots(u.words.length, []);
+  const area = $("gameArea");
+  const p = activeProfile();
+  const showText = p.mode === "read";
+  area.innerHTML = `
+    <div class="mascot-row">
+      <div class="mascot">🦊</div>
+      <div class="bubble">Tocca ogni carta e ascolta! Tocca tutto per vincere la stella!</div>
+    </div>
+    <div class="card-grid g4" id="exploreGrid"></div>`;
+  const grid = $("exploreGrid");
+  u.words.forEach((w,i)=>{
+    const c = document.createElement("button");
+    c.className = "word-card";
+    c.innerHTML = `${wordVisual(w)}<div class="wlabel">${showText ? w.fr : ""}</div><div class="wlabel-it">${showText ? w.it : ""}</div>`;
+    c.onclick = ()=>{
+      speak(w.fr);
+      c.classList.add("heard");
+      c.classList.remove("correct"); void c.offsetWidth; c.classList.add("correct");
+      setTimeout(()=>c.classList.remove("correct"), 650);
+      if(!heard.has(i)){
+        heard.add(i);
+        setDots(u.words.length, [...Array(u.words.length)].map((_,k)=>heard.has(k)?"ok":""));
+        if(heard.size === u.words.length){
+          setTimeout(()=>finishGame("explore", 3, u), 900);
+        }
+      }
+    };
+    grid.appendChild(c);
+  });
+}
+
+/* ---------- GIOCO 2: Trova! (ascolta e tocca) ---------- */
+function startFind(u, p){
+  const ROUNDS = 8;
+  const showText = p.mode === "read";
+  const seq = shuffle(u.words).slice(0, ROUNDS);
+  const results = [];
+  let round = 0, errorsTotal = 0;
+
+  function playRound(){
+    if(round >= seq.length){
+      const stars = errorsTotal === 0 ? 3 : errorsTotal <= 2 ? 2 : 1;
+      finishGame("find", stars, u);
+      return;
+    }
+    const target = seq[round];
+    const others = shuffle(u.words.filter(w=>w!==target)).slice(0,3);
+    const options = shuffle([target, ...others]);
+    let roundError = false, locked = false;
+
+    setDots(ROUNDS, results);
+    const area = $("gameArea");
+    area.innerHTML = `
+      <div class="prompt-zone">
+        <button class="big-audio" id="bigAudio">🔊</button>
+        <div class="hint">${showText ? `<span class="fr-word">${target.fr}</span>` : "Ascolta e tocca!"}</div>
+      </div>
+      <div class="card-grid g4" id="findGrid"></div>`;
+    $("bigAudio").onclick = ()=>speak(target.fr);
+    const grid = $("findGrid");
+    options.forEach(w=>{
+      const c = document.createElement("button");
+      c.className = "word-card";
+      c.innerHTML = `${wordVisual(w)}`;
+      c.onclick = ()=>{
+        if(locked) return;
+        if(w === target){
+          locked = true;
+          c.classList.add("correct");
+          c.innerHTML += `<div class="wlabel" style="color:#fff">${w.fr}</div>`;
+          sfx.good();
+          speak(target.fr, {rate:0.85});
+          results.push(roundError ? "bad" : "ok");
+          if(roundError) errorsTotal++;
+          setDots(ROUNDS, results);
+          round++;
+          setTimeout(playRound, 1300);
+        }else{
+          roundError = true;
+          c.classList.add("wrong");
+          sfx.bad();
+          setTimeout(()=>{ c.classList.remove("wrong"); c.classList.add("dim"); }, 450);
+        }
+      };
+      grid.appendChild(c);
+    });
+    setTimeout(()=>speak(target.fr), 450);
+  }
+  playRound();
+}
+
+/* ---------- GIOCO 3: Memory ---------- */
+function startMemory(u, p){
+  const PAIRS = 6;
+  const showText = p.mode === "read";
+  const chosen = shuffle(u.words).slice(0, PAIRS);
+  // modalità lettura: coppia = visuale ↔ parola scritta; ascolto: due carte visuali uguali
+  const cards = shuffle(chosen.flatMap(w => showText
+    ? [{w, kind:"visual"}, {w, kind:"word"}]
+    : [{w, kind:"visual"}, {w, kind:"visual"}]));
+  let first = null, locked = false, matched = 0, misses = 0;
+
+  setDots(PAIRS, []);
+  const area = $("gameArea");
+  area.innerHTML = `
+    <div class="mascot-row">
+      <div class="mascot">🦊</div>
+      <div class="bubble">Trova le coppie! ${showText ? "Unisci figura e parola." : ""}</div>
+    </div>
+    <div class="mem-grid" id="memGrid"></div>`;
+  const grid = $("memGrid");
+  const doneArr = [];
+
+  cards.forEach(card=>{
+    const el = document.createElement("button");
+    el.className = "mem-card";
+    const backContent = card.kind === "word"
+      ? `<div class="mword">${card.w.fr}</div>`
+      : `${wordVisual(card.w, "m")}${showText ? "" : ""}`;
+    el.innerHTML = `<div class="mem-inner"><div class="mem-face mem-front"></div><div class="mem-face mem-back">${backContent}</div></div>`;
+    el.onclick = ()=>{
+      if(locked || el.classList.contains("flip")) return;
+      sfx.flip();
+      el.classList.add("flip");
+      speak(card.w.fr, {rate:0.88});
+      if(!first){ first = {el, card}; return; }
+      locked = true;
+      const isMatch = first.card.w === card.w && first.el !== el;
+      if(isMatch){
+        matched++;
+        doneArr.push("ok");
+        setDots(PAIRS, doneArr);
+        const a = first.el, b = el;
+        setTimeout(()=>{
+          a.classList.add("matched"); b.classList.add("matched");
+          sfx.good();
+          first = null; locked = false;
+          if(matched === PAIRS){
+            const stars = misses <= 2 ? 3 : misses <= 5 ? 2 : 1;
+            setTimeout(()=>finishGame("memory", stars, u), 800);
+          }
+        }, 350);
+      }else{
+        misses++;
+        const a = first.el, b = el;
+        setTimeout(()=>{
+          a.classList.remove("flip"); b.classList.remove("flip");
+          first = null; locked = false;
+        }, 950);
+      }
+    };
+    grid.appendChild(el);
+  });
+}
+
+/* ---------- GIOCO 4: Leggi (solo modalità lettura) ---------- */
+function startRead(u){
+  const ROUNDS = 8;
+  const pool = shuffle(u.words).slice(0, ROUNDS);
+  const results = [];
+  let round = 0, errorsTotal = 0;
+
+  function playRound(){
+    if(round >= pool.length){
+      const stars = errorsTotal === 0 ? 3 : errorsTotal <= 2 ? 2 : 1;
+      finishGame("read", stars, u);
+      return;
+    }
+    const target = pool[round];
+    const others = shuffle(u.words.filter(w=>w!==target)).slice(0,2);
+    const options = shuffle([target, ...others]);
+    let roundError = false, locked = false;
+
+    setDots(ROUNDS, results);
+    const area = $("gameArea");
+    area.innerHTML = `
+      <div class="prompt-zone">
+        <div class="prompt-emoji">${target.e || ""}${target.hex ? `<div class="wswatch" style="background:${target.hex};width:84px;height:84px;margin:0 auto"></div>` : ""}${target.n ? `<div class="wdigit" style="font-size:4.5rem">${target.n}</div>` : ""}</div>
+        <div class="hint">Come si dice in francese?</div>
+      </div>
+      <div class="card-grid g3" id="readGrid"></div>`;
+    const grid = $("readGrid");
+    options.forEach(w=>{
+      const c = document.createElement("button");
+      c.className = "word-card";
+      c.style.minHeight = "84px";
+      c.innerHTML = `<div class="wlabel" style="font-size:1.35rem">${w.fr}</div>`;
+      c.onclick = ()=>{
+        if(locked) return;
+        if(w === target){
+          locked = true;
+          c.classList.add("correct");
+          sfx.good();
+          speak(target.fr);
+          results.push(roundError ? "bad" : "ok");
+          if(roundError) errorsTotal++;
+          setDots(ROUNDS, results);
+          round++;
+          setTimeout(playRound, 1200);
+        }else{
+          roundError = true;
+          c.classList.add("wrong");
+          sfx.bad();
+          speak(w.fr, {noRepeat:true});
+          setTimeout(()=>{ c.classList.remove("wrong"); c.classList.add("dim"); }, 450);
+        }
+      };
+      grid.appendChild(c);
+    });
+  }
+  playRound();
+}
+
+/* ---------- FINE GIOCO ---------- */
+const PRAISE = ["Bravo !", "Super !", "Magnifique !", "Génial !", "Très bien !"];
+function finishGame(gameId, stars, u){
+  const p = activeProfile();
+  const hadSticker = hasSticker(p, u.id);
+  setStars(u.id, gameId, stars);
+  const pNow = activeProfile();
+  const newSticker = !hadSticker && hasSticker(pNow, u.id);
+
+  sfx.win();
+  confetti(stars * 14);
+  if(newSticker) setTimeout(()=>confetti(30, [u.emoji,"🏆","⭐"]), 900);
+
+  const praise = PRAISE[Math.floor(Math.random()*PRAISE.length)];
+  const area = $("gameArea");
+  setDots(0, []);
+  area.innerHTML = `
+    <div class="win-zone">
+      <div class="wmascot">🦊</div>
+      <h2>${praise}</h2>
+      <div class="wstars">${[0,1,2].map(i=>`<span data-i="${i}">${i<stars?"⭐":"☆"}</span>`).join("")}</div>
+      ${newSticker ? `<div style="font-size:1.3rem;font-weight:700;margin:8px 0">🏆 Hai vinto la figurina <b>${u.fr}</b>!</div>` : ""}
+      <div class="win-actions">
+        <button class="btn sun" id="winAgain">🔁 Ancora!</button>
+        <button class="btn primary" id="winNext">➡️ Continua</button>
+      </div>
+    </div>`;
+  area.querySelectorAll(".wstars span").forEach((s,i)=>{
+    setTimeout(()=>{ s.classList.add("on"); if(i<stars) sfx.star(); }, 350 + i*380);
+  });
+  speak(praise, {rate:0.9});
+  $("winAgain").onclick = ()=>{ sfx.tap(); startGame(gameId); };
+  $("winNext").onclick = ()=>{ sfx.tap(); openUnit(u.id); };
+}
+
+/* ============================================================
+   ALBUM FIGURINE
+   ============================================================ */
+function renderStickers(){
+  const p = activeProfile(); if(!p) return renderProfiles();
+  const grid = $("stickerGrid");
+  grid.innerHTML = "";
+  UNITS.forEach(u=>{
+    const won = hasSticker(p, u.id);
+    const slot = document.createElement("div");
+    slot.className = "sticker-slot" + (won ? "" : " locked");
+    slot.innerHTML = `
+      <div class="semoji">${u.emoji}</div>
+      <div class="sname">${u.fr}</div>
+      <div style="font-size:.85rem;font-weight:600;color:${won ? "var(--leaf)" : "var(--ink-soft)"}">
+        ${won ? "🏆 Vinta!" : `⭐ ${unitStars(p,u.id)}/${STICKER_THRESHOLD}`}
+      </div>`;
+    grid.appendChild(slot);
+  });
+  show("screen-stickers");
+}
+$("stickBack").onclick = ()=>{ sfx.tap(); goHome(false); };
+
+/* ============================================================
+   AVVIO
+   ============================================================ */
+if(activeProfile()) goHome(false);
+else renderProfiles();
+</script>
+</body>
+</html>
