@@ -197,8 +197,8 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 }
 .word-card:active{transform:scale(.93)}
 .word-card .wemoji{font-size:3rem;line-height:1.15}
-.word-card .wswatch{width:58px;height:58px;border-radius:50%;border:var(--card-border)}
-.word-card .wdigit{font-size:3rem;font-weight:700;line-height:1.1}
+.wswatch{width:58px;height:58px;border-radius:50%;border:var(--card-border)}
+.wdigit{font-size:3rem;font-weight:700;line-height:1.1}
 .word-card .wdots{font-size:.95rem;letter-spacing:1px;line-height:1.2;max-width:110px}
 .word-card .wlabel{font-weight:700;font-size:1.12rem}
 .word-card .wlabel-it{font-size:.85rem;color:var(--ink-soft);font-weight:600}
@@ -232,6 +232,16 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .mem-back .mswatch{width:44px;height:44px;border-radius:50%;border:var(--card-border)}
 .mem-card.matched .mem-inner{animation:winBounce .6s}
 .mem-card.matched .mem-back{background:#E4F7E4;border-color:var(--leaf)}
+
+/* ---------- scrivi (spelling) ---------- */
+.spell-slots{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.spell-slot{width:44px;height:56px;border-bottom:4px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:700}
+.spell-slot.filled{animation:winBounce .4s}
+.spell-tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.spell-tile{width:56px;height:56px;background:var(--white);border:var(--card-border);border-radius:14px;box-shadow:0 4px 0 rgba(61,43,36,.22);font-size:1.7rem;font-weight:700;transition:transform .12s}
+.spell-tile:active{transform:scale(.9)}
+.spell-tile.used{visibility:hidden}
+.spell-tile.wrong{animation:shakeNo .45s;background:#FFD9D3}
 
 /* ---------- schermata vittoria ---------- */
 .win-zone{text-align:center;padding:30px 10px}
@@ -473,6 +483,7 @@ const GAMES = [
   {id:"find",    emoji:"👂", name:"Trova!", sub:"Ascolta e tocca quella giusta"},
   {id:"memory",  emoji:"🃏", name:"Memory", sub:"Trova le coppie"},
   {id:"read",    emoji:"📖", name:"Leggi", sub:"Abbina la parola scritta", readerOnly:true},
+  {id:"spell",   emoji:"✏️", name:"Scrivi", sub:"Componi la parola", readerOnly:true},
 ];
 const STICKER_THRESHOLD = 6; // stelle nell'unità per vincere la figurina
 
@@ -511,6 +522,22 @@ function setStars(unitId, gameId, stars){
   const unitScores = {...(p.scores[unitId] || {})};
   unitScores[gameId] = Math.max(unitScores[gameId] || 0, stars);
   updateProfile({scores: {...p.scores, [unitId]: unitScores}});
+}
+/* adattività leggera: le parole sbagliate tornano più spesso */
+function missKey(u, w){ return u.id + "|" + w.fr; }
+function bumpMiss(u, w, delta){
+  const p = activeProfile(); if(!p) return;
+  const miss = {...(p.miss || {})};
+  const k = missKey(u, w);
+  const next = Math.max(0, (miss[k] || 0) + delta);
+  if(next === 0) delete miss[k]; else miss[k] = next;
+  updateProfile({miss});
+}
+function pickRounds(u, p, n){
+  const miss = p.miss || {};
+  const hard = shuffle(u.words.filter(w => miss[missKey(u,w)] > 0)).slice(0, 3);
+  const rest = shuffle(u.words.filter(w => !hard.includes(w)));
+  return shuffle([...hard, ...rest].slice(0, n));
 }
 function unitStars(p, unitId){
   const s = p.scores[unitId] || {};
@@ -795,6 +822,7 @@ function startGame(gameId){
   else if(gameId === "find") startFind(u, p);
   else if(gameId === "memory") startMemory(u, p);
   else if(gameId === "read") startRead(u);
+  else if(gameId === "spell") startSpell(u);
   show("screen-game");
 }
 function setDots(total, doneArr){
@@ -824,7 +852,7 @@ function startExplore(u){
   u.words.forEach((w,i)=>{
     const c = document.createElement("button");
     c.className = "word-card";
-    c.innerHTML = `${wordVisual(w)}<div class="wlabel">${showText ? w.fr : ""}</div><div class="wlabel-it">${showText ? w.it : ""}</div>`;
+    c.innerHTML = `${wordVisual(w)}<div class="wlabel">${showText ? w.fr : ""}</div>`;
     c.onclick = ()=>{
       speak(w.fr);
       c.classList.add("heard");
@@ -846,7 +874,7 @@ function startExplore(u){
 function startFind(u, p){
   const ROUNDS = 8;
   const showText = p.mode === "read";
-  const seq = shuffle(u.words).slice(0, ROUNDS);
+  const seq = pickRounds(u, p, ROUNDS);
   const results = [];
   let round = 0, errorsTotal = 0;
 
@@ -884,11 +912,12 @@ function startFind(u, p){
           sfx.good();
           speak(target.fr, {rate:0.85});
           results.push(roundError ? "bad" : "ok");
-          if(roundError) errorsTotal++;
+          if(roundError) errorsTotal++; else bumpMiss(u, target, -1);
           setDots(ROUNDS, results);
           round++;
           setTimeout(playRound, 1300);
         }else{
+          if(!roundError) bumpMiss(u, target, +1);
           roundError = true;
           c.classList.add("wrong");
           sfx.bad();
@@ -969,7 +998,7 @@ function startMemory(u, p){
 /* ---------- GIOCO 4: Leggi (solo modalità lettura) ---------- */
 function startRead(u){
   const ROUNDS = 8;
-  const pool = shuffle(u.words).slice(0, ROUNDS);
+  const pool = pickRounds(u, activeProfile(), ROUNDS);
   const results = [];
   let round = 0, errorsTotal = 0;
 
@@ -1006,11 +1035,12 @@ function startRead(u){
           sfx.good();
           speak(target.fr);
           results.push(roundError ? "bad" : "ok");
-          if(roundError) errorsTotal++;
+          if(roundError) errorsTotal++; else bumpMiss(u, target, -1);
           setDots(ROUNDS, results);
           round++;
           setTimeout(playRound, 1200);
         }else{
+          if(!roundError) bumpMiss(u, target, +1);
           roundError = true;
           c.classList.add("wrong");
           sfx.bad();
@@ -1020,6 +1050,74 @@ function startRead(u){
       };
       grid.appendChild(c);
     });
+  }
+  playRound();
+}
+
+/* ---------- GIOCO 5: Scrivi (spelling, solo modalità lettura) ---------- */
+function bareWord(w){ return w.fr.replace(/^(le |la |les |l')/, ""); }
+function promptVisual(w){
+  if(w.e) return `<div class="prompt-emoji">${w.e}</div>`;
+  if(w.hex) return `<div class="wswatch" style="background:${w.hex};width:84px;height:84px;margin:0 auto"></div>`;
+  if(w.n) return `<div class="wdigit" style="font-size:4.5rem">${w.n}</div>`;
+  return "";
+}
+function startSpell(u){
+  const spellable = u.words.filter(w => /^[a-zàâçéèêëîïôùûüœ-]+$/i.test(bareWord(w)) && bareWord(w).length <= 9);
+  const pool = shuffle(spellable).slice(0, 6);
+  const results = [];
+  let round = 0, errorsTotal = 0;
+
+  function playRound(){
+    if(round >= pool.length){
+      const stars = errorsTotal === 0 ? 3 : errorsTotal <= 3 ? 2 : 1;
+      finishGame("spell", stars, u);
+      return;
+    }
+    const target = pool[round];
+    const letters = bareWord(target).toLowerCase().split("");
+    let pos = 0, roundError = false;
+
+    setDots(pool.length, results);
+    const area = $("gameArea");
+    area.innerHTML = `
+      <div class="prompt-zone">
+        ${promptVisual(target)}
+        <div class="spell-slots" id="spellSlots">${letters.map(()=>'<div class="spell-slot"></div>').join("")}</div>
+      </div>
+      <div class="spell-tiles" id="spellTiles"></div>`;
+    const slots = [...area.querySelectorAll(".spell-slot")];
+    const tilesBox = $("spellTiles");
+    shuffle(letters.map((ch,i)=>({ch,i}))).forEach(t=>{
+      const b = document.createElement("button");
+      b.className = "spell-tile";
+      b.textContent = t.ch;
+      b.onclick = ()=>{
+        if(b.classList.contains("used")) return;
+        if(t.ch === letters[pos]){
+          sfx.tap();
+          slots[pos].textContent = t.ch;
+          slots[pos].classList.add("filled");
+          b.classList.add("used");
+          pos++;
+          if(pos === letters.length){
+            sfx.good();
+            speak(target.fr);
+            results.push(roundError ? "bad" : "ok");
+            if(roundError) errorsTotal++;
+            setDots(pool.length, results);
+            round++;
+            setTimeout(playRound, 1400);
+          }
+        }else{
+          roundError = true;
+          sfx.bad();
+          b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
+        }
+      };
+      tilesBox.appendChild(b);
+    });
+    setTimeout(()=>speak(target.fr), 400);
   }
   playRound();
 }
@@ -1068,7 +1166,7 @@ function renderStickers(){
   grid.innerHTML = "";
   UNITS.forEach(u=>{
     const won = hasSticker(p, u.id);
-    const slot = document.createElement("div");
+    const slot = document.createElement(won ? "button" : "div");
     slot.className = "sticker-slot" + (won ? "" : " locked");
     slot.innerHTML = `
       <div class="semoji">${u.emoji}</div>
@@ -1076,6 +1174,7 @@ function renderStickers(){
       <div style="font-size:.85rem;font-weight:600;color:${won ? "var(--leaf)" : "var(--ink-soft)"}">
         ${won ? "🏆 Vinta!" : `⭐ ${unitStars(p,u.id)}/${STICKER_THRESHOLD}`}
       </div>`;
+    if(won) slot.onclick = ()=>{ speak(u.fr); confetti(10, [u.emoji,"⭐"]); };
     grid.appendChild(slot);
   });
   show("screen-stickers");
