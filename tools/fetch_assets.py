@@ -45,7 +45,7 @@ def fetch(url):
 
 def main():
     sources = ""
-    for name in ("data.js", "app.js"):
+    for name in ("data.js", "app.js", "story.js", "games.js"):
         path = ROOT / name
         if path.exists():
             sources += path.read_text(encoding="utf-8")
