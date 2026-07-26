@@ -3,22 +3,31 @@
 /* ============================================================
    STATO + STORAGE (immutabile: ogni update crea nuovo oggetto)
    ============================================================ */
-const STORAGE_KEY = "petitrenard_v1";
+const STORAGE_KEY = "petitrenard_v1"; // legacy: si legge, non si scrive né si cancella
 
 function loadState(){
+  /* 1) stato v2 già presente */
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return {profiles:[], activeId:null};
-    const parsed = JSON.parse(raw);
-    if(!parsed || !Array.isArray(parsed.profiles)) return {profiles:[], activeId:null};
-    return parsed;
-  }catch(e){ return {profiles:[], activeId:null}; }
+    const raw = localStorage.getItem(STORAGE_KEY_V2);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && Array.isArray(parsed.profiles)) return parsed;
+    }
+  }catch(e){ /* v2 illeggibile: si prova la migrazione qui sotto */ }
+
+  /* 2) primo avvio dopo l'aggiornamento: migra dalla v1 senza toccarla */
+  try{
+    const legacy = localStorage.getItem(STORAGE_KEY);
+    if(legacy) return migrateV1(JSON.parse(legacy));
+  }catch(e){ /* v1 corrotta: si riparte puliti, la v1 resta sul disco */ }
+
+  return {profiles:[], activeId:null};
 }
 let state = loadState();
 
 function setState(next){
   state = next;
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state)); }catch(e){}
 }
 function activeProfile(){
   return state.profiles.find(p => p.id === state.activeId) || null;
@@ -246,7 +255,7 @@ $("npCreate").onclick = ()=>{
   const name = $("nameInput").value.trim() || "Petit chef";
   const p = {
     id: "p" + Math.random().toString(36).slice(2,9),
-    name, avatar: npAvatar, mode: npMode, scores: {}
+    name, avatar: npAvatar, mode: npMode, scores: {}, miss: {}, chapters: {}
   };
   setState({...state, profiles:[...state.profiles, p], activeId: p.id});
   sfx.win(); confetti(24);
