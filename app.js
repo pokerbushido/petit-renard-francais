@@ -174,6 +174,11 @@ function foxReact(cls){
   f.classList.add(cls);
 }
 function show(screenId){
+  /* ogni cambio schermata azzera il parlato pendente: niente voce residua
+     dopo che il bambino è già altrove. playCutscene chiama show() PRIMA di
+     nextBeat(), quindi la prima battuta della cutscene parte dopo questo
+     cancel e non viene mai tagliata. */
+  if("speechSynthesis" in window) speechSynthesis.cancel();
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   const el = $(screenId);
   el.classList.remove("active");

@@ -121,6 +121,22 @@ function finishChapter(token){
       </div>
     </div>`;
   speak(r.errors === 0 ? "Parfait !" : "Bravo !", {rate:0.9});
+
+  /* cambio di regione: un piccolo annuncio in più mentre si è ancora sulla
+     schermata di ricompensa. Il segnale visivo vero (il cartello "now" che
+     si anima) arriva dopo, quando il bambino preme "Continua" e la mappa
+     si ridisegna su map.js. */
+  const idx = chapterIndex(r.chapter.id);
+  const next = CHAPTERS[idx + 1];
+  const changedRegion = next && next.regionId !== r.chapter.regionId;
+  if(changedRegion){
+    const reg = REGIONS.find(x => x.id === next.regionId);
+    setTimeout(()=>{
+      confetti(24, ["✨","🗺️"]);
+      speak(`On va à ${reg.fr} !`, {rate:0.85});
+    }, 1200);
+  }
+
   $("chAgain").onclick = ()=>{ sfx.tap(); openChapter(r.chapter.id); };
   $("chNext").onclick  = ()=>{ sfx.tap(); renderMap(); };
 }

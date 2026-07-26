@@ -344,7 +344,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 @media(prefers-reduced-motion:reduce){
   .cloud,.mascot,.game-fox,.prompt-zone .big-audio{animation:none}
   .unit-card,.game-card,.word-card,.profile-card,.sticker-slot,.song-card{animation:none}
-  .node,.region-sign{animation:none}
+  .node,.region-sign,.region-sign.now{animation:none}
 }
 
 /* ============ MASCOTTE SVG ============ */
@@ -415,6 +415,9 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
   box-shadow:0 6px 0 rgba(61,43,36,.2);animation:screenIn .4s both;animation-delay:var(--d,0ms)}
 .region-sign .rfr{font-weight:800;font-size:1.3rem;text-shadow:0 2px 0 rgba(0,0,0,.2)}
 .region-sign .rit{font-size:.9rem;font-weight:600;opacity:.95}
+/* regione appena raggiunta: il cartello "atterra" con un piccolo rimbalzo */
+.region-sign.now{animation:signIn .6s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes signIn{from{transform:scale(.7) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
 .node{position:relative;z-index:1;display:block;width:170px;min-height:44px;margin:0 auto 22px;
   transform:translateX(var(--x,0));background:var(--paper-deep);border:4px solid var(--ink);
   border-radius:24px;padding:12px 10px;text-align:center;cursor:pointer;

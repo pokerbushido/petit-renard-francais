@@ -29,6 +29,7 @@ function renderMap(){
       sign.className = "region-sign";
       sign.style.background = r.color;
       sign.innerHTML = `<div class="rfr">${r.fr}</div><div class="rit">${r.it}</div>`;
+      if(r.id === (CHAPTERS[Math.min(cur, CHAPTERS.length-1)] || {}).regionId) sign.classList.add("now");
       block.appendChild(sign);
       list.appendChild(block);
     }
