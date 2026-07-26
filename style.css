@@ -259,6 +259,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .sticker-slot.locked .sname{color:var(--ink-soft)}
 .sticker-slot:not(.locked){transform:rotate(-2deg)}
 .sticker-slot:not(.locked):nth-child(even){transform:rotate(2deg)}
+.sticker-slot.gold{background:linear-gradient(160deg,#FFD75E,#FFB020);border-color:#8A5A00}
 
 /* ---------- coriandoli ---------- */
 .confetto{position:fixed;top:-20px;z-index:99;pointer-events:none;font-size:1.4rem;animation:fall linear forwards}

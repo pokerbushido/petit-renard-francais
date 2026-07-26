@@ -84,6 +84,17 @@ function buildChapterRounds(unit, profile, availableIds, n = CHAPTER_ROUNDS){
   return rounds;
 }
 
+/* Due strade per la stessa figurina: completare il capitolo,
+   oppure accumulare STICKER_THRESHOLD stelle nel mondo giocando libero. */
+function unitStarsOf(profile, unitId){
+  return Object.values((profile.scores || {})[unitId] || {}).reduce((a,b) => a + b, 0);
+}
+function hasPrize(profile, chapterId){
+  const c = CHAPTERS.find(x => x.id === chapterId);
+  if(!c) return false;
+  return isChapterDone(profile, chapterId) || unitStarsOf(profile, c.unitId) >= STICKER_THRESHOLD;
+}
+
 /* Migrazione v1 → v2. Non tocca mai la chiave v1: chi chiama la legge
    e basta. Su input corrotto ritorna uno stato vuoto valido. */
 function migrateV1(rawV1){

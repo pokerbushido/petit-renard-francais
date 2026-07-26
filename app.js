@@ -428,18 +428,20 @@ function renderStickers(){
   const p = activeProfile(); if(!p) return renderProfiles();
   const grid = $("stickerGrid");
   grid.innerHTML = "";
-  UNITS.forEach((u,i)=>{
-    const won = hasSticker(p, u.id);
+  CHAPTERS.forEach((c,i)=>{
+    const u = UNITS.find(x => x.id === c.unitId);
+    const won = hasPrize(p, c.id);
+    const gold = isChapterGold(p, c.id);
     const slot = document.createElement(won ? "button" : "div");
-    slot.className = "sticker-slot" + (won ? "" : " locked");
-    slot.style.setProperty("--d", i*50+"ms");
+    slot.className = "sticker-slot" + (won ? "" : " locked") + (gold ? " gold" : "");
+    slot.style.setProperty("--d", i*40+"ms");
     slot.innerHTML = `
-      <div class="semoji">${em(u.emoji)}</div>
+      <div class="semoji">${em(won ? c.friend.emoji : u.emoji)}</div>
       <div class="sname">${u.fr}</div>
       <div style="font-size:.85rem;font-weight:600;color:${won ? "var(--leaf)" : "var(--ink-soft)"}">
-        ${won ? "🏆 Vinta!" : `⭐ ${unitStars(p,u.id)}/${STICKER_THRESHOLD}`}
+        ${gold ? "🌟 Perfetto!" : won ? "🏆 Vinta!" : "🔒 Da scoprire"}
       </div>`;
-    if(won) slot.onclick = ()=>{ speak(u.fr); confetti(10, [u.emoji,"⭐"]); };
+    if(won) slot.onclick = ()=>{ speak(u.fr); confetti(10, [c.friend.emoji,"⭐"]); };
     grid.appendChild(slot);
   });
   show("screen-stickers");

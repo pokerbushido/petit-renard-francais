@@ -220,7 +220,7 @@ check("l'ultimo capitolo è la festa finale", () => {
 
 const P = G(`({chapterIndex, isChapterDone, isChapterGold, currentChapterIndex,
   isChapterUnlocked, completeChapterPatch, unlockedUnitIds, availableGameIds,
-  nextGameFor, buildChapterRounds, migrateV1, STORAGE_KEY_V2})`);
+  nextGameFor, buildChapterRounds, migrateV1, STORAGE_KEY_V2, hasPrize})`);
 
 const profile = (over = {}) => ({
   id:"p1", name:"Test", avatar:"🦊", mode:"read", scores:{}, chapters:{}, ...over
@@ -357,6 +357,17 @@ check("la migrazione regge input corrotti senza lanciare", () => {
 
 check("la chiave v2 è diversa dalla v1", () => {
   assert.equal(P.STORAGE_KEY_V2, "petitrenard_v2");
+});
+
+check("la figurina si ottiene per capitolo o per stelle, senza doppioni", () => {
+  const p = profile();
+  const c = CHAPTERS[0];
+  const viaCapitolo = {...p, ...P.completeChapterPatch(p, c.id, 0)};
+  assert.equal(P.isChapterDone(viaCapitolo, c.id), true);
+  const viaStelle = {...p, scores:{[c.unitId]:{explore:3, find:3}}};
+  assert.equal(P.hasPrize(viaStelle, c.id), true, "6 stelle nel mondo devono valere la figurina");
+  assert.equal(P.hasPrize(viaCapitolo, c.id), true, "il capitolo completato deve valere la figurina");
+  assert.equal(P.hasPrize(profile(), c.id), false);
 });
 
 console.log(`✅ ${checks} check passati (${UNITS.length} unità, ${UNITS.reduce((n,u)=>n+u.words.length,0)} parole, ${CHAPTERS.length} capitoli)`);
