@@ -52,7 +52,7 @@ const UNITS = [
       {fr:"le fromage", it:"il formaggio", e:"🧀"},
       {fr:"le lait", it:"il latte", e:"🥛"},
       {fr:"le gâteau", it:"la torta", e:"🎂"},
-      {fr:"l'œuf", it:"l'uovo", e:"🍳"},
+      {fr:"l'œuf", it:"l'uovo", e:"🥚"},
       {fr:"la fraise", it:"la fragola", e:"🍓"},
       {fr:"la glace", it:"il gelato", e:"🍦"},
       {fr:"le poulet", it:"il pollo", e:"🍗"},
@@ -111,6 +111,139 @@ const UNITS = [
       {fr:"non", it:"no", e:"👎"},
       {fr:"bonne nuit", it:"buonanotte", e:"🌛"},
       {fr:"je t'aime", it:"ti voglio bene", e:"❤️"},
+    ]
+  },
+  {
+    id:"maison", emoji:"🏠", fr:"La maison", it:"La casa", color:"#C48B62",
+    words:[
+      {fr:"la maison", it:"la casa", e:"🏠"},
+      {fr:"la porte", it:"la porta", e:"🚪"},
+      {fr:"la fenêtre", it:"la finestra", e:"🪟"},
+      {fr:"le lit", it:"il letto", e:"🛏️"},
+      {fr:"la chaise", it:"la sedia", e:"🪑"},
+      {fr:"le canapé", it:"il divano", e:"🛋️"},
+      {fr:"la clé", it:"la chiave", e:"🔑"},
+      {fr:"la lampe", it:"la lampada", e:"💡"},
+      {fr:"l'arbre", it:"l'albero", e:"🌳"},
+    ]
+  },
+  {
+    id:"ferme", emoji:"🚜", fr:"La ferme", it:"La fattoria", color:"#8DBF4A",
+    words:[
+      {fr:"le coq", it:"il gallo", e:"🐓"},
+      {fr:"la poule", it:"la gallina", e:"🐔"},
+      {fr:"le cochon", it:"il maiale", e:"🐷"},
+      {fr:"le mouton", it:"la pecora", e:"🐑"},
+      {fr:"la chèvre", it:"la capra", e:"🐐"},
+      {fr:"le tracteur", it:"il trattore", e:"🚜"},
+      {fr:"le foin", it:"il fieno", e:"🌾"},
+      {fr:"le canard", it:"l'anatra", e:"🦆"},
+      {fr:"la cabane", it:"la capanna", e:"🛖"},
+    ]
+  },
+  {
+    id:"meteo", emoji:"🌦️", fr:"Le temps", it:"Il tempo che fa", color:"#7EC8E3",
+    words:[
+      {fr:"le soleil", it:"il sole", e:"☀️"},
+      {fr:"la pluie", it:"la pioggia", e:"🌧️"},
+      {fr:"le nuage", it:"la nuvola", e:"☁️"},
+      {fr:"le vent", it:"il vento", e:"🌬️"},
+      {fr:"la neige", it:"la neve", e:"❄️"},
+      {fr:"l'orage", it:"il temporale", e:"⛈️"},
+      {fr:"l'arc-en-ciel", it:"l'arcobaleno", e:"🌈"},
+      {fr:"le parapluie", it:"l'ombrello", e:"☂️"},
+    ]
+  },
+  {
+    id:"marche", emoji:"🧺", fr:"Le marché", it:"Il mercato", color:"#E8734A",
+    words:[
+      {fr:"l'oignon", it:"la cipolla", e:"🧅"},
+      {fr:"le champignon", it:"il fungo", e:"🍄"},
+      {fr:"la tomate", it:"il pomodoro", e:"🍅"},
+      {fr:"la carotte", it:"la carota", e:"🥕"},
+      {fr:"le raisin", it:"l'uva", e:"🍇"},
+      {fr:"le panier", it:"il cestino", e:"🧺"},
+      {fr:"l'argent", it:"i soldi", e:"💶"},
+      {fr:"la fleur", it:"il fiore", e:"🌻"},
+      {fr:"le miel", it:"il miele", e:"🍯"},
+    ]
+  },
+  {
+    id:"transports", emoji:"🚂", fr:"Les transports", it:"I mezzi", color:"#5B8DEF",
+    words:[
+      {fr:"la voiture", it:"la macchina", e:"🚗"},
+      {fr:"le train", it:"il treno", e:"🚂"},
+      {fr:"le vélo", it:"la bicicletta", e:"🚲"},
+      {fr:"le bateau", it:"la barca", e:"⛵"},
+      {fr:"l'avion", it:"l'aereo", e:"✈️"},
+      {fr:"le bus", it:"l'autobus", e:"🚌"},
+      {fr:"la fusée", it:"il razzo", e:"🚀"},
+      {fr:"le camion", it:"il camion", e:"🚚"},
+    ]
+  },
+  {
+    id:"ecole", emoji:"✏️", fr:"L'école", it:"La scuola", color:"#B07CC6",
+    words:[
+      {fr:"le crayon", it:"la matita", e:"✏️"},
+      {fr:"le cahier", it:"il quaderno", e:"📓"},
+      {fr:"le livre", it:"il libro", e:"📕"},
+      {fr:"le stylo", it:"la penna", e:"🖊️"},
+      {fr:"les ciseaux", it:"le forbici", e:"✂️"},
+      {fr:"le cartable", it:"lo zaino", e:"🎒"},
+      {fr:"la règle", it:"il righello", e:"📏"},
+      {fr:"la cloche", it:"la campanella", e:"🔔"},
+    ]
+  },
+  {
+    id:"mer", emoji:"🌊", fr:"La mer", it:"Il mare", color:"#2FB6C4",
+    words:[
+      {fr:"la plage", it:"la spiaggia", e:"🏖️"},
+      {fr:"le coquillage", it:"la conchiglia", e:"🐚"},
+      {fr:"le crabe", it:"il granchio", e:"🦀"},
+      {fr:"la baleine", it:"la balena", e:"🐋"},
+      {fr:"le dauphin", it:"il delfino", e:"🐬"},
+      {fr:"le corail", it:"il corallo", e:"🪸"},
+      {fr:"la vague", it:"l'onda", e:"🌊"},
+      {fr:"le seau", it:"il secchiello", e:"🪣"},
+    ]
+  },
+  {
+    id:"montagne", emoji:"⛰️", fr:"La montagne", it:"La montagna", color:"#7D8FA0",
+    words:[
+      {fr:"la montagne", it:"la montagna", e:"⛰️"},
+      {fr:"le sapin", it:"l'abete", e:"🌲"},
+      {fr:"l'ours", it:"l'orso", e:"🐻"},
+      {fr:"le renard", it:"la volpe", e:"🦊"},
+      {fr:"le feu", it:"il fuoco", e:"🔥"},
+      {fr:"la tente", it:"la tenda", e:"⛺"},
+      {fr:"l'étoile", it:"la stella", e:"⭐"},
+      {fr:"le rocher", it:"la roccia", e:"🪨"},
+    ]
+  },
+  {
+    id:"sport", emoji:"⚽", fr:"Le sport", it:"Lo sport", color:"#43A047",
+    words:[
+      {fr:"le ballon", it:"il pallone", e:"⚽"},
+      {fr:"courir", it:"correre", e:"🏃"},
+      {fr:"nager", it:"nuotare", e:"🏊"},
+      {fr:"la gymnastique", it:"la ginnastica", e:"🤸"},
+      {fr:"danser", it:"ballare", e:"💃"},
+      {fr:"la médaille", it:"la medaglia", e:"🏅"},
+      {fr:"le cyclisme", it:"il ciclismo", e:"🚴"},
+      {fr:"le ski", it:"lo sci", e:"⛷️"},
+    ]
+  },
+  {
+    id:"fete", emoji:"🎉", fr:"La fête", it:"La festa", color:"#F272B0",
+    words:[
+      {fr:"l'anniversaire", it:"il compleanno", e:"🥳"},
+      {fr:"le cadeau", it:"il regalo", e:"🎁"},
+      {fr:"le ballon de baudruche", it:"il palloncino", e:"🎈"},
+      {fr:"la bougie", it:"la candelina", e:"🕯️"},
+      {fr:"la musique", it:"la musica", e:"🎶"},
+      {fr:"l'ami", it:"l'amico", e:"🧑‍🤝‍🧑"},
+      {fr:"la fête", it:"la festa", e:"🎉"},
+      {fr:"le feu d'artifice", it:"i fuochi d'artificio", e:"🎆"},
     ]
   },
 ];
