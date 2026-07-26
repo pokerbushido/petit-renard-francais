@@ -94,6 +94,9 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 
 /* ---------- profili ---------- */
 .profile-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:22px}
+/* avviso per l'adulto, non per il bambino: discreto, mai rosso/allarmante */
+.storage-notice{text-align:center;color:var(--ink-soft);font-size:.85rem;
+  font-weight:600;max-width:360px;margin:0 auto}
 .profile-card{
   width:150px;background:var(--white);border:var(--card-border);border-radius:var(--radius-big);
   box-shadow:var(--card-shadow);padding:18px 12px;text-align:center;

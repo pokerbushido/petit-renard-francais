@@ -35,9 +35,20 @@ try{
   if(localStorage.getItem(STORAGE_KEY_V2) === null && state.profiles.length) setState(state);
 }catch(e){}
 
+/* Se il salvataggio fallisce (quota piena, storage bloccato…) il bambino
+   continua a giocare e a vincere stelle come se nulla fosse: non deve mai
+   accorgersene. Ma qualcuno deve poterlo scoprire, altrimenti si perde tutto
+   in silenzio. storageFailed riflette solo l'ULTIMO tentativo di scrittura:
+   se torna a funzionare, l'avviso sparisce da solo (v. renderProfiles). */
+let storageFailed = false;
 function setState(next){
   state = next;
-  try{ localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state)); }catch(e){}
+  try{
+    localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state));
+    storageFailed = false;
+  }catch(e){
+    storageFailed = true;
+  }
 }
 function activeProfile(){
   return state.profiles.find(p => p.id === state.activeId) || null;
@@ -229,6 +240,10 @@ function renderProfiles(){
     add.onclick = ()=>{ sfx.tap(); openNewProfile(); };
     list.appendChild(add);
   }
+  /* avviso discreto per l'adulto, mai per il bambino: nessun tono d'allarme,
+     nessun blocco del gioco, invisibile quando il salvataggio funziona */
+  const notice = $("storageNotice");
+  if(notice) notice.hidden = !storageFailed;
   show("screen-profiles");
 }
 function escapeHtml(s){
@@ -365,6 +380,11 @@ $("gameBack").onclick = ()=>{
   sfx.tap();
   speechSynthesis.cancel();
   if(chapterRunning()){ abortChapter(); renderMap(); return; }
+  /* sulla schermata di ricompensa del capitolo chapterRunning() è già
+     false: se il capitolo è stato aperto senza mai passare da un'unità
+     (es. dalla mappa) currentUnit resta null e openUnit(null.id) lancerebbe
+     un errore, rendendo ⬅️ un tasto morto. Si torna alla mappa invece. */
+  if(!currentUnit) return renderMap();
   openUnit(currentUnit.id);
 };
 $("gameRepeat").onclick = ()=>{

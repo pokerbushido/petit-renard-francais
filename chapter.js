@@ -16,6 +16,11 @@
 let chapterRun = null;   // {chapter, unit, rounds, i, errors, token}
 let chapterToken = 0;
 let chapterTimer = null; // id del setTimeout di pacing posseduto dal runner
+/* id del setTimeout che pronuncia la parola all'apertura di un round
+   (assegnato dalle funzioni round* in games.js). Senza tracciarlo qui,
+   abortChapter() non può fermarlo: premendo ⬅️ subito dopo l'inizio di un
+   round si sentirebbe una parola francese di troppo a bambino già altrove. */
+let roundTimer = null;
 
 function chapterRunning(){ return chapterRun !== null; }
 
@@ -26,6 +31,7 @@ function abortChapter(){
   chapterToken++;
   chapterRun = null;
   if(chapterTimer){ clearTimeout(chapterTimer); chapterTimer = null; }
+  if(roundTimer){ clearTimeout(roundTimer); roundTimer = null; }
 }
 
 function openChapter(chapterId){

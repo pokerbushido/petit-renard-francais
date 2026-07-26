@@ -346,7 +346,9 @@ function roundExplore(unit, word, onDone){
     bumpMiss(unit, word, -1);
     setTimeout(()=> onDone(0), 1200);
   };
-  setTimeout(()=> speak(word.fr), 400);
+  /* tracciato in roundTimer (chapter.js): abortChapter() lo cancella, così
+     ⬅️ premuto appena dopo l'apertura del round non fa parlare Foxy a vuoto */
+  roundTimer = setTimeout(()=> speak(word.fr), 400);
 }
 
 /* Trova!: ascolta la parola, tocca l'immagine giusta fra quattro. */
@@ -380,7 +382,8 @@ function roundFind(unit, word, p, onDone){
     };
     grid.appendChild(b);
   });
-  setTimeout(()=> speak(word.fr), 500);
+  /* v. commento in roundExplore: tracciato per poter essere cancellato da abortChapter() */
+  roundTimer = setTimeout(()=> speak(word.fr), 500);
 }
 
 /* Leggi: la parola scritta, si tocca l'immagine giusta. Solo modalità lettura. */
@@ -460,7 +463,8 @@ function roundSpell(unit, word, onDone){
     };
     tiles.appendChild(b);
   });
-  setTimeout(()=> speak(word.fr), 400);
+  /* v. commento in roundExplore: tracciato per poter essere cancellato da abortChapter() */
+  roundTimer = setTimeout(()=> speak(word.fr), 400);
 }
 
 /* Memory: tre coppie soltanto (la parola del round più due distrattori),
