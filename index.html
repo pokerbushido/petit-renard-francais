@@ -40,9 +40,23 @@
     </div>
   </section>
 
+  <!-- ==================== MAPPA AVVENTURA ==================== -->
+  <section id="screen-map" class="screen">
+    <div class="topbar">
+      <button class="chip" id="mapProfile">🦊 …</button>
+      <span class="spacer"></span>
+      <button class="chip" id="mapStars"><span class="star">⭐</span> 0</button>
+      <button class="btn round sun" id="mapFree" title="Gioca libero">🎮</button>
+      <button class="btn round sun" id="mapSongs" title="Canzoni">🎵</button>
+      <button class="btn round sun" id="mapStickers" title="Grand Livre">🏆</button>
+    </div>
+    <div class="path" id="pathList"></div>
+  </section>
+
   <!-- ==================== HOME / MAPPA ==================== -->
   <section id="screen-home" class="screen">
     <div class="topbar">
+      <button class="btn round" id="homeBack">⬅️</button>
       <button class="chip" id="homeProfile">🦊 …</button>
       <span class="spacer"></span>
       <button class="chip" id="homeStars"><span class="star">⭐</span> 0</button>
@@ -136,6 +150,7 @@
 <script src="assets-map.js"></script>
 <script src="mascot.js"></script>
 <script src="cutscene.js"></script>
+<script src="map.js"></script>
 <script src="games.js"></script>
 <script src="app.js"></script>
 </body>

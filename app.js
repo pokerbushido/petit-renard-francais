@@ -213,7 +213,7 @@ function renderProfiles(){
     card.onclick = ()=>{
       sfx.tap();
       setState({...state, activeId: p.id});
-      goHome(true);
+      renderMap();
     };
     list.appendChild(card);
   });
@@ -269,7 +269,7 @@ $("npCreate").onclick = ()=>{
   };
   setState({...state, profiles:[...state.profiles, p], activeId: p.id});
   sfx.win(); confetti(24);
-  goHome(true);
+  renderMap();
 };
 
 /* ============================================================
@@ -291,7 +291,8 @@ function goHome(greet){
   $("homeMascot").innerHTML = foxSvg("salue", {size:96});
   const grid = $("unitGrid");
   grid.innerHTML = "";
-  UNITS.forEach((u,i)=>{
+  const unlocked = new Set(unlockedUnitIds(p));
+  UNITS.filter(u => unlocked.has(u.id)).forEach((u,i)=>{
     const stars = unitStars(p, u.id);
     const maxStars = availableGames(p).length * 3;
     const card = document.createElement("button");
@@ -310,6 +311,7 @@ function goHome(greet){
   show("screen-home");
   if(greet) speak("Salut !", {rate:0.9});
 }
+$("homeBack").onclick = ()=>{ sfx.tap(); renderMap(); };
 $("homeProfile").onclick = ()=>{ sfx.tap(); renderProfiles(); };
 $("homeStickers").onclick = ()=>{ sfx.tap(); renderStickers(); };
 
@@ -347,7 +349,7 @@ function openUnit(unitId){
   show("screen-unit");
   speak(u.fr, {rate:0.85});
 }
-$("unitBack").onclick = ()=>{ sfx.tap(); goHome(false); };
+$("unitBack").onclick = ()=>{ sfx.tap(); renderMap(); };
 
 /* ============================================================
    MOTORE GIOCHI
@@ -441,7 +443,7 @@ function renderStickers(){
   });
   show("screen-stickers");
 }
-$("stickBack").onclick = ()=>{ sfx.tap(); goHome(false); };
+$("stickBack").onclick = ()=>{ sfx.tap(); renderMap(); };
 
 /* ============================================================
    CHANSONS — karaoke di filastrocche (melodie WebAudio)
@@ -523,7 +525,7 @@ function openSong(songId){
   show("screen-song");
 }
 $("homeSongs").onclick = ()=>{ sfx.tap(); renderSongs(); };
-$("songsBack").onclick = ()=>{ sfx.tap(); stopSong(); goHome(false); };
+$("songsBack").onclick = ()=>{ sfx.tap(); stopSong(); renderMap(); };
 $("songBack").onclick = ()=>{ sfx.tap(); stopSong(); speechSynthesis.cancel(); renderSongs(); };
 
 /* ============================================================
@@ -545,5 +547,5 @@ $("songBack").onclick = ()=>{ sfx.tap(); stopSong(); speechSynthesis.cancel(); r
 /* ============================================================
    AVVIO
    ============================================================ */
-if(activeProfile()) goHome(false);
+if(activeProfile()) renderMap();
 else renderProfiles();
