@@ -18,7 +18,7 @@ const CHAPTERS = [
   {
     id:"ch-salutations", regionId:"village", unitId:"salutations",
     title:"Le prime parole",
-    friend:{emoji:"🧓", name:"Mamie Lulu", line:"Bonjour mes petits ! Chi mi ha rubato i saluti?"},
+    friend:{emoji:"🧶", name:"Mamie Lulu", line:"Bonjour mes petits ! Chi mi ha rubato i saluti?"},
     cutscene:[
       {fox:"salue", text:"Salut ! Io sono Foxy. Andiamo in Francia insieme?", speak:"Salut! Io sono Foxy. Andiamo in Francia insieme?"},
       {pie:"vole",  emoji:"🎒", text:"Uh oh… quella è Pipelette la gazza! Sta rubando le parole!", speak:"Uh oh! Quella è Pipelette la gazza. Sta rubando le parole!"},
@@ -91,7 +91,7 @@ const CHAPTERS = [
   {
     id:"ch-nombres", regionId:"ville", unitId:"nombres",
     title:"I numeri della città",
-    friend:{emoji:"🚏", name:"Marcel le chauffeur", line:"Che autobus è? Non so più contare!"},
+    friend:{emoji:"🎫", name:"Marcel le chauffeur", line:"Che autobus è? Non so più contare!"},
     cutscene:[
       {fox:"curieux", emoji:"🏙️", text:"Ecco la città! Ma i numeri degli autobus sono spariti.", speak:"Ecco la città! Ma i numeri degli autobus sono spariti."},
       {pie:"rit", text:"«Cra cra! Da uno a dieci, tutti miei!»", speak:"Cra cra! Da uno a dieci, tutti miei!"},
