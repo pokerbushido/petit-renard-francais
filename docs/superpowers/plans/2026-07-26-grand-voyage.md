@@ -195,7 +195,7 @@ Expected: profilo esistente caricato, e **tutti e cinque i giochi** giocabili fi
 - [ ] **Step 4: Verifica che nulla sia rimasto orfano**
 
 Run: `node tools/check.mjs && grep -c "function start" app.js games.js`
-Expected: check PASS; `app.js:0` e `games.js:5`.
+Expected: check PASS; `app.js:1` e `games.js:5`. L'unico `start*` che resta in `app.js` è `startGame`, il router: è corretto che ci sia.
 
 - [ ] **Step 5: Commit**
 
