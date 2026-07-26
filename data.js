@@ -236,7 +236,7 @@ const UNITS = [
   {
     id:"fete", emoji:"🎉", fr:"La fête", it:"La festa", color:"#F272B0",
     words:[
-      {fr:"l'anniversaire", it:"il compleanno", e:"🎂"},
+      {fr:"l'anniversaire", it:"il compleanno", e:"🥳"},
       {fr:"le cadeau", it:"il regalo", e:"🎁"},
       {fr:"le ballon de baudruche", it:"il palloncino", e:"🎈"},
       {fr:"la bougie", it:"la candelina", e:"🕯️"},

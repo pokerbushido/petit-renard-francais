@@ -116,6 +116,7 @@ const EMOJI_ASSET = {
   "🥕": "assets/1f955.webp",
   "🥖": "assets/1f956.png",
   "🥛": "assets/1f95b.png",
+  "🥳": "assets/1f973.webp",
   "🥺": "assets/1f97a.webp",
   "🦀": "assets/1f980.webp",
   "🦁": "assets/1f981.webp",

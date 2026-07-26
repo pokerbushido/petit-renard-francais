@@ -51,6 +51,18 @@ check("nessuna parola francese è duplicata fra unità diverse", () => {
   }
 });
 
+check("nessun emoji rappresenta due parole diverse", () => {
+  const visto = new Map();
+  for (const u of UNITS) for (const w of u.words) {
+    if (!w.e) continue;
+    if (visto.has(w.e) && visto.get(w.e).fr !== w.fr) {
+      const p = visto.get(w.e);
+      assert.fail(`l'emoji ${w.e} è sia "${p.fr}" (${p.unit}) sia "${w.fr}" (${u.id}): per chi non sa leggere la figura È la parola`);
+    }
+    visto.set(w.e, {fr: w.fr, unit: u.id});
+  }
+});
+
 check("ogni parola ha fr, it e un visual", () => {
   for (const u of UNITS) {
     for (const w of u.words) {
