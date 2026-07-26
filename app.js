@@ -13,10 +13,17 @@ function loadState(){
     if(raw){
       const parsed = JSON.parse(raw);
       if(parsed && Array.isArray(parsed.profiles)) return parsed;
+      /* JSON valido ma forma sbagliata (es. {profiles:null}): stessa rete
+         di sicurezza del JSON illeggibile qui sotto. La copia va scritta
+         DOPO il controllo di forma, non solo nel catch: altrimenti questo
+         caso ci cade dentro senza backup e il prossimo setState() lo
+         sovrascrive per sempre senza che nessuno abbia mai potuto salvarlo. */
+      try{ localStorage.setItem(STORAGE_KEY_V2 + "_bak", raw); }catch(e2){}
     }
   }catch(e){
-    /* v2 illeggibile: si mette al sicuro una copia prima che una scrittura
-       successiva cancelli per sempre il blob danneggiato (spesso recuperabile a mano) */
+    /* v2 illeggibile (JSON non valido): si mette al sicuro una copia prima
+       che una scrittura successiva cancelli per sempre il blob danneggiato
+       (spesso recuperabile a mano) */
     try{ if(raw) localStorage.setItem(STORAGE_KEY_V2 + "_bak", raw); }catch(e2){}
   }
 

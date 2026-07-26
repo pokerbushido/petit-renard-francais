@@ -11,6 +11,13 @@ function renderMap(){
 
   $("mapProfile").innerHTML = `${em(p.avatar)} ${escapeHtml(p.name)}`;
   $("mapStars").innerHTML = `<span class="star">⭐</span> ${totalStars(p)}`;
+  /* stesso avviso discreto di renderProfiles: la mappa è la schermata su
+     cui i bambini restano per un'ora intera, ben oltre la schermata dei
+     profili che non rivedono più finché non cambiano giocatore. Senza
+     ripeterlo qui, un fallimento di scrittura a metà sessione passerebbe
+     inosservato fino al prossimo riavvio. */
+  const mapNotice = $("mapStorageNotice");
+  if(mapNotice) mapNotice.hidden = !storageFailed;
 
   const cur = currentChapterIndex(p);
   /* a viaggio finito currentChapterIndex torna CHAPTERS.length: nessun i

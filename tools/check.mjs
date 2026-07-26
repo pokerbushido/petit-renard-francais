@@ -66,13 +66,19 @@ check("ogni parola ha fr, it e un visual", () => {
   }
 });
 
-check("ogni emoji di parola ha un asset scaricato", () => {
-  const mapSrc = readFileSync(join(ROOT, "assets-map.js"), "utf8");
+check("ogni emoji di parola ha un asset scaricato e il file esiste su disco", () => {
   for (const u of UNITS) {
     for (const w of u.words) {
       if (!w.e) continue;
-      assert.ok(mapSrc.includes(`"${w.e}"`),
+      const rel = EMOJI_ASSET[w.e];
+      assert.ok(rel,
         `unità ${u.id}: emoji ${w.e} ("${w.fr}") manca in assets-map.js — esegui python3 tools/fetch_assets.py`);
+      // un emoji mappato ma senza file su disco produce un <img> morto → una
+      // carta vuota → un roundFind che il bambino non può risolvere: senza
+      // questo controllo tools/fetch_assets.py potrebbe "mappare" un URL mai
+      // scaricato con successo e il check risulterebbe verde lo stesso.
+      assert.ok(existsSync(join(ROOT, rel)),
+        `unità ${u.id}: emoji ${w.e} ("${w.fr}") è mappato a "${rel}" ma il file non esiste — esegui python3 tools/fetch_assets.py`);
     }
   }
 });
@@ -206,20 +212,19 @@ check("i capitoli sono raggruppati per regione senza salti", () => {
     "una regione compare in due blocchi non contigui: l'ordine dei capitoli è sbagliato");
 });
 
-check("ogni emoji di capitolo ha un asset scaricato", () => {
-  const mapSrc = readFileSync(join(ROOT, "assets-map.js"), "utf8");
+check("ogni emoji di capitolo ha un asset scaricato e il file esiste su disco", () => {
+  const checkOne = (emoji, label) => {
+    const rel = EMOJI_ASSET[emoji];
+    assert.ok(rel, `${label}: emoji ${emoji} manca in assets-map.js — esegui python3 tools/fetch_assets.py`);
+    assert.ok(existsSync(join(ROOT, rel)),
+      `${label}: emoji ${emoji} è mappato a "${rel}" ma il file non esiste — esegui python3 tools/fetch_assets.py`);
+  };
   for (const c of CHAPTERS) {
-    // Check friend emoji
     if (c.friend && c.friend.emoji) {
-      assert.ok(mapSrc.includes(`"${c.friend.emoji}"`),
-        `capitolo ${c.id}: friend emoji ${c.friend.emoji} ("${c.friend.name}") manca in assets-map.js — esegui python3 tools/fetch_assets.py`);
+      checkOne(c.friend.emoji, `capitolo ${c.id}: friend emoji ("${c.friend.name}")`);
     }
-    // Check cutscene emoji
     for (const b of c.cutscene) {
-      if (b.emoji) {
-        assert.ok(mapSrc.includes(`"${b.emoji}"`),
-          `capitolo ${c.id}: emoji di scena ${b.emoji} manca in assets-map.js — esegui python3 tools/fetch_assets.py`);
-      }
+      if (b.emoji) checkOne(b.emoji, `capitolo ${c.id}: emoji di scena`);
     }
   }
 });
