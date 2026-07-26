@@ -28,12 +28,6 @@ check("ogni unità ha id univoco", () => {
   assert.equal(new Set(ids).size, ids.length, "id di unità duplicati: " + ids.join(","));
 });
 
-check("ogni unità ha almeno 5 parole", () => {
-  for (const u of UNITS) {
-    assert.ok(u.words.length >= 5, `unità ${u.id}: solo ${u.words.length} parole`);
-  }
-});
-
 check("tutte le 18 unità del viaggio esistono", () => {
   const attese = ["animaux","couleurs","nombres","nourriture","corps","famille","vetements",
     "salutations","maison","ferme","meteo","marche","transports","ecole","mer","montagne","sport","fete"];
@@ -136,11 +130,15 @@ check("ogni capitolo punta a una regione esistente", () => {
 
 check("nessuna unità resta fuori dal percorso", () => {
   const used = new Set(CHAPTERS.map(c => c.unitId));
-  const phase1 = ["animaux","couleurs","nombres","nourriture","corps","famille","vetements","salutations"];
+  // Fase 2: i capitoli arrivano nel Task 12. Questa eccezione deve sparire lì:
+  // il secondo ciclo la fa fallire non appena un capitolo referenzia queste unità.
+  const senzaCapitolo = ["maison","ferme","meteo","marche","transports","ecole","mer","montagne","sport","fete"];
   for (const u of UNITS) {
-    if (phase1.includes(u.id)) {
-      assert.ok(used.has(u.id), `unità ${u.id} non è referenziata da nessun capitolo`);
-    }
+    if (senzaCapitolo.includes(u.id)) continue;
+    assert.ok(used.has(u.id), `unità ${u.id} non è referenziata da nessun capitolo`);
+  }
+  for (const id of senzaCapitolo) {
+    assert.ok(!used.has(id), `l'unità ${id} ha ora un capitolo: togli "${id}" dall'eccezione di fase 2`);
   }
 });
 

@@ -121,10 +121,10 @@ const UNITS = [
       {fr:"la fenêtre", it:"la finestra", e:"🪟"},
       {fr:"le lit", it:"il letto", e:"🛏️"},
       {fr:"la chaise", it:"la sedia", e:"🪑"},
-      {fr:"la table", it:"il tavolo", e:"🪵"},
+      {fr:"le canapé", it:"il divano", e:"🛋️"},
       {fr:"la clé", it:"la chiave", e:"🔑"},
       {fr:"la lampe", it:"la lampada", e:"💡"},
-      {fr:"le jardin", it:"il giardino", e:"🌷"},
+      {fr:"l'arbre", it:"l'albero", e:"🌳"},
     ]
   },
   {
@@ -137,8 +137,8 @@ const UNITS = [
       {fr:"la chèvre", it:"la capra", e:"🐐"},
       {fr:"le tracteur", it:"il trattore", e:"🚜"},
       {fr:"le foin", it:"il fieno", e:"🌾"},
-      {fr:"l'étable", it:"la stalla", e:"🏚️"},
-      {fr:"la grange", it:"il fienile", e:"🏠"},
+      {fr:"le canard", it:"l'anatra", e:"🦆"},
+      {fr:"la grange", it:"il fienile", e:"🏚️"},
     ]
   },
   {
@@ -158,7 +158,7 @@ const UNITS = [
     id:"marche", emoji:"🧺", fr:"Le marché", it:"Il mercato", color:"#E8734A",
     words:[
       {fr:"l'oignon", it:"la cipolla", e:"🧅"},
-      {fr:"les champignons", it:"i funghi", e:"🍄"},
+      {fr:"le champignon", it:"il fungo", e:"🍄"},
       {fr:"la tomate", it:"il pomodoro", e:"🍅"},
       {fr:"la carotte", it:"la carota", e:"🥕"},
       {fr:"le raisin", it:"l'uva", e:"🍇"},
@@ -187,9 +187,9 @@ const UNITS = [
       {fr:"le crayon", it:"la matita", e:"✏️"},
       {fr:"le cahier", it:"il quaderno", e:"📓"},
       {fr:"le livre", it:"il libro", e:"📕"},
-      {fr:"la gomme", it:"la gomma", e:"🧽"},
+      {fr:"le stylo", it:"la penna", e:"🖊️"},
       {fr:"les ciseaux", it:"le forbici", e:"✂️"},
-      {fr:"le sac", it:"lo zaino", e:"🎒"},
+      {fr:"le cartable", it:"lo zaino", e:"🎒"},
       {fr:"la règle", it:"il righello", e:"📏"},
       {fr:"la cloche", it:"la campanella", e:"🔔"},
     ]
@@ -198,11 +198,11 @@ const UNITS = [
     id:"mer", emoji:"🌊", fr:"La mer", it:"Il mare", color:"#2FB6C4",
     words:[
       {fr:"la plage", it:"la spiaggia", e:"🏖️"},
-      {fr:"le sable", it:"la sabbia", e:"🪨"},
+      {fr:"le sable", it:"la sabbia", e:"🏜️"},
       {fr:"le coquillage", it:"la conchiglia", e:"🐚"},
       {fr:"le crabe", it:"il granchio", e:"🦀"},
       {fr:"la baleine", it:"la balena", e:"🐋"},
-      {fr:"le phare", it:"il faro", e:"🗼"},
+      {fr:"le parasol", it:"l'ombrellone", e:"⛱️"},
       {fr:"la vague", it:"l'onda", e:"🌊"},
       {fr:"le seau", it:"il secchiello", e:"🪣"},
     ]
@@ -226,7 +226,7 @@ const UNITS = [
       {fr:"le ballon", it:"il pallone", e:"⚽"},
       {fr:"courir", it:"correre", e:"🏃"},
       {fr:"nager", it:"nuotare", e:"🏊"},
-      {fr:"sauter", it:"saltare", e:"🤸"},
+      {fr:"la gymnastique", it:"la ginnastica", e:"🤸"},
       {fr:"danser", it:"ballare", e:"💃"},
       {fr:"la médaille", it:"la medaglia", e:"🏅"},
       {fr:"le cyclisme", it:"il ciclismo", e:"🚴"},
@@ -236,7 +236,7 @@ const UNITS = [
   {
     id:"fete", emoji:"🎉", fr:"La fête", it:"La festa", color:"#F272B0",
     words:[
-      {fr:"les bonbons", it:"le caramelle", e:"🍬"},
+      {fr:"l'anniversaire", it:"il compleanno", e:"🎂"},
       {fr:"le cadeau", it:"il regalo", e:"🎁"},
       {fr:"le ballon de baudruche", it:"il palloncino", e:"🎈"},
       {fr:"la bougie", it:"la candelina", e:"🕯️"},
