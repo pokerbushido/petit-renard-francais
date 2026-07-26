@@ -263,7 +263,7 @@ check("le parole sbagliate in passato compaiono per prime", () => {
   const hard = u.words[u.words.length - 1];
   const p = profile({miss: {[`${u.id}|${hard.fr}`]: 3}});
   const rounds = P.buildChapterRounds(u, p, P.availableGameIds(p), 6);
-  assert.ok(rounds.some(r => r.word === hard), "la parola sbagliata non è stata ri-proposta");
+  assert.equal(rounds[0].word, hard, "la parola sbagliata non è stata messa per prima");
 });
 
 check("la migrazione conserva stelle, nome e avatar", () => {

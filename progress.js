@@ -39,7 +39,7 @@ function completeChapterPatch(profile, chapterId, errors){
   const prev = chapterEntry(profile, chapterId) || {};
   return {
     chapters: {
-      ...(profile.chapters || {}),
+      ...((profile && profile.chapters) || {}),
       [chapterId]: { done: true, gold: !!prev.gold || errors === 0 }
     }
   };
