@@ -31,3 +31,13 @@ Emoji **Noto** di Google (animate dove disponibili, PNG statici altrove), scaric
 ## Deploy
 
 Qualsiasi hosting statico: GitHub Pages, Netlify (drag & drop di `index.html`), Vercel.
+
+## Sviluppo
+
+Check degli invarianti (dati, capitoli, logica di progressione):
+
+    node tools/check.mjs
+
+Va eseguito prima di ogni commit. Dopo aver aggiunto parole nuove:
+
+    python3 tools/fetch_assets.py && node tools/check.mjs
