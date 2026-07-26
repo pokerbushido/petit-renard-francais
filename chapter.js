@@ -21,6 +21,14 @@ let chapterTimer = null; // id del setTimeout di pacing posseduto dal runner
    abortChapter() non può fermarlo: premendo ⬅️ subito dopo l'inizio di un
    round si sentirebbe una parola francese di troppo a bambino già altrove. */
 let roundTimer = null;
+/* id del setTimeout dell'annuncio di cambio regione (v. finishChapter) e
+   token che lo invalida se si lascia la schermata di ricompensa prima che
+   scatti: senza questi due, il tasto ⬅️ o "Continua"/"Ancora!" premuti nella
+   finestra di 1200ms farebbero cadere coriandoli sulla schermata sbagliata
+   e, peggio, speak() taglierebbe una narrazione già in corso lì (esattamente
+   il difetto che roundTimer esiste per evitare, ma sulla voce giusta). */
+let regionTimer = null;
+let rewardToken = 0;
 
 function chapterRunning(){ return chapterRun !== null; }
 
@@ -32,6 +40,16 @@ function abortChapter(){
   chapterRun = null;
   if(chapterTimer){ clearTimeout(chapterTimer); chapterTimer = null; }
   if(roundTimer){ clearTimeout(roundTimer); roundTimer = null; }
+  leaveReward();
+}
+
+/* Da chiamare ad ogni uscita dalla schermata di ricompensa (i suoi stessi
+   pulsanti, o ⬅️): ferma l'eventuale annuncio di cambio regione ancora in
+   attesa e invalida il token, così anche un timer già scattato un istante
+   prima di essere cancellato si accorge di essere in ritardo e non fa nulla. */
+function leaveReward(){
+  rewardToken++;
+  if(regionTimer){ clearTimeout(regionTimer); regionTimer = null; }
 }
 
 function openChapter(chapterId){
@@ -40,6 +58,11 @@ function openChapter(chapterId){
   const u = c && UNITS.find(x => x.id === c.unitId);
   if(!c || !p || !u) return renderMap();
   const seen = p.chapters && p.chapters[chapterId];
+  /* la ricompensa si raggiunge sempre e solo da un capitolo: azzerare qui
+     l'unità di gioco libero fa sì che ⬅️ dalla ricompensa (in app.js) trovi
+     sempre currentUnit nullo e torni alla mappa, anche se il bambino aveva
+     aperto un mondo in gioco libero prima di iniziare questo capitolo. */
+  currentUnit = null;
 
   const begin = ()=>{
     const token = ++chapterToken;
@@ -131,18 +154,23 @@ function finishChapter(token){
   /* cambio di regione: un piccolo annuncio in più mentre si è ancora sulla
      schermata di ricompensa. Il segnale visivo vero (il cartello "now" che
      si anima) arriva dopo, quando il bambino preme "Continua" e la mappa
-     si ridisegna su map.js. */
+     si ridisegna su map.js. Solo alla PRIMA vera conquista (!wasDone): senza
+     questo, ogni replay del capitolo rifarebbe scattare l'annuncio, che
+     smette di significare "sei arrivato in un posto nuovo". */
   const idx = chapterIndex(r.chapter.id);
   const next = CHAPTERS[idx + 1];
-  const changedRegion = next && next.regionId !== r.chapter.regionId;
+  const changedRegion = !wasDone && next && next.regionId !== r.chapter.regionId;
   if(changedRegion){
     const reg = REGIONS.find(x => x.id === next.regionId);
-    setTimeout(()=>{
+    const myReward = rewardToken;
+    regionTimer = setTimeout(()=>{
+      regionTimer = null;
+      if(myReward !== rewardToken) return; // si è già lasciata la ricompensa
       confetti(24, ["✨","🗺️"]);
       speak(`On va à ${reg.fr} !`, {rate:0.85});
     }, 1200);
   }
 
-  $("chAgain").onclick = ()=>{ sfx.tap(); openChapter(r.chapter.id); };
-  $("chNext").onclick  = ()=>{ sfx.tap(); renderMap(); };
+  $("chAgain").onclick = ()=>{ sfx.tap(); leaveReward(); openChapter(r.chapter.id); };
+  $("chNext").onclick  = ()=>{ sfx.tap(); leaveReward(); renderMap(); };
 }

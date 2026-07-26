@@ -381,10 +381,11 @@ $("gameBack").onclick = ()=>{
   speechSynthesis.cancel();
   if(chapterRunning()){ abortChapter(); renderMap(); return; }
   /* sulla schermata di ricompensa del capitolo chapterRunning() è già
-     false: se il capitolo è stato aperto senza mai passare da un'unità
-     (es. dalla mappa) currentUnit resta null e openUnit(null.id) lancerebbe
-     un errore, rendendo ⬅️ un tasto morto. Si torna alla mappa invece. */
-  if(!currentUnit) return renderMap();
+     false: openChapter (chapter.js) azzera currentUnit all'inizio del
+     capitolo, quindi da qui è sempre null e si torna alla mappa — mai a un
+     mondo di gioco libero rimasto in memoria da prima. leaveReward() ferma
+     anche l'eventuale annuncio di cambio regione ancora in attesa. */
+  if(!currentUnit){ leaveReward(); return renderMap(); }
   openUnit(currentUnit.id);
 };
 $("gameRepeat").onclick = ()=>{
