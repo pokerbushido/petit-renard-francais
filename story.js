@@ -18,7 +18,7 @@ const CHAPTERS = [
   {
     id:"ch-salutations", regionId:"village", unitId:"salutations",
     title:"Le prime parole",
-    friend:{emoji:"👵", name:"Mamie Lulu", line:"Bonjour mes petits ! Chi mi ha rubato i saluti?"},
+    friend:{emoji:"🧓", name:"Mamie Lulu", line:"Bonjour mes petits ! Chi mi ha rubato i saluti?"},
     cutscene:[
       {fox:"salue", text:"Salut ! Io sono Foxy. Andiamo in Francia insieme?", speak:"Salut! Io sono Foxy. Andiamo in Francia insieme?"},
       {pie:"vole",  emoji:"🎒", text:"Uh oh… quella è Pipelette la gazza! Sta rubando le parole!", speak:"Uh oh! Quella è Pipelette la gazza. Sta rubando le parole!"},
@@ -91,7 +91,7 @@ const CHAPTERS = [
   {
     id:"ch-nombres", regionId:"ville", unitId:"nombres",
     title:"I numeri della città",
-    friend:{emoji:"🚌", name:"Marcel le chauffeur", line:"Che autobus è? Non so più contare!"},
+    friend:{emoji:"🚏", name:"Marcel le chauffeur", line:"Che autobus è? Non so più contare!"},
     cutscene:[
       {fox:"curieux", emoji:"🏙️", text:"Ecco la città! Ma i numeri degli autobus sono spariti.", speak:"Ecco la città! Ma i numeri degli autobus sono spariti."},
       {pie:"rit", text:"«Cra cra! Da uno a dieci, tutti miei!»", speak:"Cra cra! Da uno a dieci, tutti miei!"},
@@ -175,7 +175,7 @@ const CHAPTERS = [
   {
     id:"ch-corps", regionId:"cote", unitId:"corps",
     title:"Il gioco del corpo",
-    friend:{emoji:"🤸", name:"Zoé la gymnaste", line:"Tocca la testa… ma come si dice in francese?"},
+    friend:{emoji:"🧘", name:"Zoé la gymnaste", line:"Tocca la testa… ma come si dice in francese?"},
     cutscene:[
       {fox:"saute", text:"Zoé fa ginnastica nel prato e ci insegna un gioco.", speak:"Zoé fa ginnastica nel prato e ci insegna un gioco."},
       {pie:"boude", text:"Ma Pipelette le ha rubato i nomi delle parti del corpo!", speak:"Ma Pipelette le ha rubato i nomi delle parti del corpo!"},
@@ -196,7 +196,7 @@ const CHAPTERS = [
   {
     id:"ch-fete", regionId:"fete", unitId:"fete", finale:true,
     title:"La grande festa",
-    friend:{emoji:"🎂", name:"Tous les amis", line:"On fait la fête ! Grazie per averci aiutato!"},
+    friend:{emoji:"🎊", name:"Tous les amis", line:"On fait la fête ! Grazie per averci aiutato!"},
     cutscene:[
       {pie:"boude", emoji:"🎒", text:"Pipelette arriva col sacco vuoto: ha restituito tutte le parole.", speak:"Pipelette arriva col sacco vuoto: ha restituito tutte le parole."},
       {pie:"rit", text:"«Cra cra… volevo solo qualcuno con cui giocare!» dice la gazza.", speak:"Cra cra, volevo solo qualcuno con cui giocare!"},

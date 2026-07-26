@@ -2,14 +2,14 @@
 /* Check eseguibile del progetto: carica i file dati in un contesto vm
    (non sono moduli ES, sono script con globali) e verifica gli invarianti.
    Uso: node tools/check.mjs */
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { createContext, runInContext } from "node:vm";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const FILES = ["data.js", "story.js", "mascot.js", "progress.js"];
+const FILES = ["data.js", "story.js", "mascot.js", "progress.js", "assets-map.js"];
 
 const ctx = createContext({ window: {}, console });
 for (const name of FILES) {
@@ -19,6 +19,7 @@ const G = (expr) => runInContext(expr, ctx);
 
 const UNITS = G("UNITS");
 const GAMES = G("GAMES");
+const EMOJI_ASSET = G("EMOJI_ASSET");
 
 let checks = 0;
 const check = (name, fn) => { fn(); checks++; };
@@ -51,17 +52,9 @@ check("nessuna parola francese è duplicata fra unità diverse", () => {
   }
 });
 
-check("nessun emoji rappresenta due parole diverse", () => {
-  const visto = new Map();
-  for (const u of UNITS) for (const w of u.words) {
-    if (!w.e) continue;
-    if (visto.has(w.e) && visto.get(w.e).fr !== w.fr) {
-      const p = visto.get(w.e);
-      assert.fail(`l'emoji ${w.e} è sia "${p.fr}" (${p.unit}) sia "${w.fr}" (${u.id}): per chi non sa leggere la figura È la parola`);
-    }
-    visto.set(w.e, {fr: w.fr, unit: u.id});
-  }
-});
+/* La guardia vera e propria (comprese le figurine dei capitoli) vive più
+   sotto, dopo che CHAPTERS è caricato — v. "nessun emoji rappresenta due
+   parole/figurine diverse". */
 
 check("ogni parola ha fr, it e un visual", () => {
   for (const u of UNITS) {
@@ -120,6 +113,41 @@ check("nessuna posa triste di Foxy legata all'errore", () => {
 });
 
 const REGIONS = G("REGIONS"), CHAPTERS = G("CHAPTERS");
+
+check("nessun emoji rappresenta due parole/figurine diverse", () => {
+  /* Le figurine (friend) sono anch'esse una superficie "immagine=parola":
+     si vedono nel Grand Livre e si toccano per risentire la parola del
+     capitolo (v. app.js renderStickers). Un friend che INCARNA la parola
+     della propria tappa — Coco il gallo 🐓 = "le coq" nel mondo ferme — è
+     rinforzo, non collisione: stesso emoji, stesso significato, stesso
+     mondo. L'eccezione è ristretta a QUESTO caso (emoji del friend uguale
+     a una parola del SUO STESSO capitolo): ogni altra coincidenza — con la
+     parola di un mondo diverso, o con la figurina di un altro capitolo —
+     resta un errore, perché per chi non sa leggere l'emoji è la parola. */
+  const parole = new Map(); // emoji -> {fr, unit}
+  for (const u of UNITS) for (const w of u.words) {
+    if (!w.e) continue;
+    if (parole.has(w.e) && parole.get(w.e).fr !== w.fr) {
+      const p = parole.get(w.e);
+      assert.fail(`l'emoji ${w.e} è sia "${p.fr}" (${p.unit}) sia "${w.fr}" (${u.id}): per chi non sa leggere la figura È la parola`);
+    }
+    parole.set(w.e, {fr: w.fr, unit: u.id});
+  }
+  const friends = new Map(); // emoji -> {name, chapterId}
+  for (const c of CHAPTERS) {
+    const emoji = c.friend && c.friend.emoji;
+    if (!emoji) continue;
+    const word = parole.get(emoji);
+    if (word && word.unit !== c.unitId) {
+      assert.fail(`l'emoji ${emoji} della figurina "${c.friend.name}" (capitolo ${c.id}) è già "${word.fr}" nel mondo ${word.unit}: per chi non sa leggere la figura È la parola`);
+    }
+    const other = friends.get(emoji);
+    if (other && other.name !== c.friend.name) {
+      assert.fail(`l'emoji ${emoji} è sia la figurina "${other.name}" sia "${c.friend.name}": stesso vincolo, per chi non legge la figura È il personaggio`);
+    }
+    friends.set(emoji, {name: c.friend.name, chapterId: c.id});
+  }
+});
 
 check("ogni capitolo ha id univoco", () => {
   const ids = CHAPTERS.map(c => c.id);

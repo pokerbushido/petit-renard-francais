@@ -52,7 +52,7 @@ const UNITS = [
       {fr:"le fromage", it:"il formaggio", e:"🧀"},
       {fr:"le lait", it:"il latte", e:"🥛"},
       {fr:"le gâteau", it:"la torta", e:"🎂"},
-      {fr:"l'œuf", it:"l'uovo", e:"🍳"},
+      {fr:"l'œuf", it:"l'uovo", e:"🥚"},
       {fr:"la fraise", it:"la fragola", e:"🍓"},
       {fr:"la glace", it:"il gelato", e:"🍦"},
       {fr:"le poulet", it:"il pollo", e:"🍗"},
@@ -138,7 +138,7 @@ const UNITS = [
       {fr:"le tracteur", it:"il trattore", e:"🚜"},
       {fr:"le foin", it:"il fieno", e:"🌾"},
       {fr:"le canard", it:"l'anatra", e:"🦆"},
-      {fr:"la grange", it:"il fienile", e:"🏚️"},
+      {fr:"la cabane", it:"la capanna", e:"🛖"},
     ]
   },
   {
@@ -198,11 +198,11 @@ const UNITS = [
     id:"mer", emoji:"🌊", fr:"La mer", it:"Il mare", color:"#2FB6C4",
     words:[
       {fr:"la plage", it:"la spiaggia", e:"🏖️"},
-      {fr:"le sable", it:"la sabbia", e:"🏜️"},
       {fr:"le coquillage", it:"la conchiglia", e:"🐚"},
       {fr:"le crabe", it:"il granchio", e:"🦀"},
       {fr:"la baleine", it:"la balena", e:"🐋"},
-      {fr:"le parasol", it:"l'ombrellone", e:"⛱️"},
+      {fr:"le dauphin", it:"il delfino", e:"🐬"},
+      {fr:"le corail", it:"il corallo", e:"🪸"},
       {fr:"la vague", it:"l'onda", e:"🌊"},
       {fr:"le seau", it:"il secchiello", e:"🪣"},
     ]
