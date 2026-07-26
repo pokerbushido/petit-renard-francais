@@ -7,13 +7,18 @@ const STORAGE_KEY = "petitrenard_v1"; // legacy: si legge, non si scrive né si 
 
 function loadState(){
   /* 1) stato v2 già presente */
+  let raw = null;
   try{
-    const raw = localStorage.getItem(STORAGE_KEY_V2);
+    raw = localStorage.getItem(STORAGE_KEY_V2);
     if(raw){
       const parsed = JSON.parse(raw);
       if(parsed && Array.isArray(parsed.profiles)) return parsed;
     }
-  }catch(e){ /* v2 illeggibile: si prova la migrazione qui sotto */ }
+  }catch(e){
+    /* v2 illeggibile: si mette al sicuro una copia prima che una scrittura
+       successiva cancelli per sempre il blob danneggiato (spesso recuperabile a mano) */
+    try{ if(raw) localStorage.setItem(STORAGE_KEY_V2 + "_bak", raw); }catch(e2){}
+  }
 
   /* 2) primo avvio dopo l'aggiornamento: migra dalla v1 senza toccarla */
   try{
@@ -24,6 +29,11 @@ function loadState(){
   return {profiles:[], activeId:null};
 }
 let state = loadState();
+/* prima migrazione: fissa subito lo stato v2, così non si rigenera (con id
+   casuali diversi) a ogni avvio finché il bambino non gioca la prima partita */
+try{
+  if(localStorage.getItem(STORAGE_KEY_V2) === null && state.profiles.length) setState(state);
+}catch(e){}
 
 function setState(next){
   state = next;
