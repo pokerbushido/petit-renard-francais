@@ -45,9 +45,16 @@ function completeChapterPatch(profile, chapterId, errors){
   };
 }
 
+/* Un mondo si sblocca in gioca libero per due strade indipendenti: perché il
+   viaggio ci è arrivato, oppure perché il bambino ci ha già giocato (stelle
+   in un mondo migrato dalla v1, dove i capitoli non esistevano ancora). Senza
+   la seconda strada, la migrazione da un profilo v1 reale fa sparire dal
+   gioco libero ogni mondo giocato prima di questa versione tranne il primo. */
 function unlockedUnitIds(profile){
   const upTo = Math.min(currentChapterIndex(profile), CHAPTERS.length - 1);
-  return CHAPTERS.slice(0, upTo + 1).map(c => c.unitId);
+  const fromPath = CHAPTERS.slice(0, upTo + 1).map(c => c.unitId);
+  const played = UNITS.filter(u => unitStarsOf(profile, u.id) > 0).map(u => u.id);
+  return [...new Set([...fromPath, ...played])];
 }
 
 function availableGameIds(profile){

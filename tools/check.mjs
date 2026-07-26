@@ -269,13 +269,35 @@ check("un capitolo completato resta rigiocabile", () => {
   assert.equal(P.isChapterUnlocked(p2, CHAPTERS[0].id), true);
 });
 
-check("gioca libero mostra solo le unità dei capitoli sbloccati", () => {
-  // Array.from: unlockedUnitIds nasce da .map() su CHAPTERS del realm vm,
-  // deepEqual fallirebbe per identità di realm pur essendo lo stesso contenuto.
+check("gioca libero mostra le unità dei capitoli sbloccati E quelle già giocate", () => {
+  // Array.from: unlockedUnitIds nasce da .map()/.filter() su dati del realm
+  // vm, deepEqual fallirebbe per identità di realm pur essendo lo stesso contenuto.
   const p = profile();
   assert.deepEqual(Array.from(P.unlockedUnitIds(p)), [CHAPTERS[0].unitId]);
   const p2 = {...p, ...P.completeChapterPatch(p, CHAPTERS[0].id, 0)};
   assert.deepEqual(Array.from(P.unlockedUnitIds(p2)), [CHAPTERS[0].unitId, CHAPTERS[1].unitId]);
+
+  // Profilo v1 realistico (v. finding C1): 36 stelle sparse in quattro mondi
+  // mai toccati dal percorso a capitoli — ch-maison, il terzo capitolo,
+  // punta a un'unità che in v1 non esisteva nemmeno. Nessuna stella in
+  // "salutations" (primo capitolo): la migrazione si ferma subito, chapters
+  // resta vuoto. Senza la seconda strada in unlockedUnitIds, il gioco
+  // libero mostrerebbe solo "salutations" e farebbe sparire ogni mondo che
+  // la bambina ha già giocato prima di questa versione.
+  const v1 = {profiles:[{id:"a", name:"Bimba", avatar:"🐼", mode:"listen", scores:{
+    animaux:{explore:3, find:3},
+    couleurs:{explore:3, find:3},
+    nourriture:{explore:3, find:3},
+    corps:{explore:3, find:3},
+  }}], activeId:"a"};
+  const migrata = P.migrateV1(v1).profiles[0];
+  assert.equal(P.isChapterDone(migrata, CHAPTERS[0].id), false,
+    "premessa del test: nessuna stella in salutations, la migrazione non deve sbloccare capitoli");
+  const libero = new Set(P.unlockedUnitIds(migrata));
+  for (const id of ["animaux","couleurs","nourriture","corps"]) {
+    assert.ok(libero.has(id), `il mondo "${id}" ha stelle migrate ma non compare in gioca libero`);
+  }
+  assert.ok(libero.has(CHAPTERS[0].unitId), "il primo capitolo del percorso resta comunque sbloccato");
 });
 
 check("la modalità ascolto esclude i giochi di lettura", () => {
