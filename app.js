@@ -268,6 +268,7 @@ function goHome(greet){
   $("homeProfile").innerHTML = `${em(p.avatar)} ${escapeHtml(p.name)}`;
   $("homeStars").innerHTML = `<span class="star">⭐</span> ${totalStars(p)}`;
   $("homeBubble").textContent = HOME_PHRASES[Math.floor(Math.random()*HOME_PHRASES.length)];
+  $("homeMascot").className = "mascot has-svg";
   $("homeMascot").innerHTML = foxSvg("salue", {size:96});
   const grid = $("unitGrid");
   grid.innerHTML = "";
@@ -381,7 +382,7 @@ function finishGame(gameId, stars, u){
   setDots(0, []);
   area.innerHTML = `
     <div class="win-zone">
-      <div class="wmascot">${foxSvg("saute", {size:130})}</div>
+      <div class="wmascot has-svg">${foxSvg("saute", {size:130})}</div>
       <h2>${praise}</h2>
       <div class="wstars">${[0,1,2].map(i=>`<span data-i="${i}">${i<stars?"⭐":"☆"}</span>`).join("")}</div>
       ${newSticker ? `<div style="font-size:1.3rem;font-weight:700;margin:8px 0">🏆 Hai vinto la figurina <b>${u.fr}</b>!</div>` : ""}

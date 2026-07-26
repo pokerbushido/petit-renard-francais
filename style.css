@@ -74,7 +74,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 /* ---------- mascotte + fumetto ---------- */
 .mascot-row{display:flex;align-items:flex-end;gap:12px;margin:6px 0 20px}
 .mascot{font-size:3.4rem;line-height:1;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18));animation:idleBob 3s ease-in-out infinite;transform-origin:bottom center}
-.mascot:has(.mascot-svg){animation:none;font-size:0}
+.mascot.has-svg{animation:none;font-size:0}
 @keyframes idleBob{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(-4px)}}
 .bubble{
   position:relative;background:var(--white);border:var(--card-border);
@@ -236,6 +236,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 /* ---------- schermata vittoria ---------- */
 .win-zone{text-align:center;padding:30px 10px}
 .win-zone .wmascot{font-size:5rem;display:inline-block;animation:winDance .8s cubic-bezier(.34,1.56,.64,1) infinite alternate}
+.win-zone .wmascot.has-svg{animation:none;font-size:0}
 @keyframes winDance{from{transform:rotate(-8deg) translateY(0)}to{transform:rotate(8deg) translateY(-12px)}}
 .win-zone h2{font-size:2rem;margin:12px 0 4px}
 .win-zone .wstars{font-size:3rem;letter-spacing:8px;margin:10px 0}
