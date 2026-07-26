@@ -339,6 +339,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 @media(prefers-reduced-motion:reduce){
   .cloud,.mascot,.game-fox,.prompt-zone .big-audio{animation:none}
   .unit-card,.game-card,.word-card,.profile-card,.sticker-slot,.song-card{animation:none}
+  .node,.region-sign{animation:none}
 }
 
 /* ============ MASCOTTE SVG ============ */
@@ -412,7 +413,14 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .node{position:relative;z-index:1;display:block;width:170px;min-height:44px;margin:0 auto 22px;
   transform:translateX(var(--x,0));background:var(--paper-deep);border:4px solid var(--ink);
   border-radius:24px;padding:12px 10px;text-align:center;cursor:pointer;
-  box-shadow:0 6px 0 rgba(61,43,36,.2);animation:screenIn .4s both;animation-delay:var(--d,0ms)}
+  box-shadow:0 6px 0 rgba(61,43,36,.2);animation:nodeIn .4s backwards;animation-delay:var(--d,0ms)}
+/* l'ingresso porta con sé l'offset --x invece di scriverci sopra: "backwards" (non "both")
+   lascia che a fine animazione torni a valere il transform in cascata qui sopra, così lo
+   zig-zag resta e :active sotto non viene silenziato dal keyframe finale */
+@keyframes nodeIn{
+  from{opacity:0;transform:translateX(var(--x,0)) translateY(18px) scale(.98)}
+  to{opacity:1;transform:translateX(var(--x,0))}
+}
 .node:active{transform:translateX(var(--x,0)) scale(.94)}
 .node .node-badge .aemoji{width:56px;height:56px}
 .node .node-title{font-weight:700;font-size:1rem;margin-top:4px}
