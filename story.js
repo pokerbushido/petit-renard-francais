@@ -41,9 +41,8 @@ const CHAPTERS = [
     title:"La casa senza nomi",
     friend:{emoji:"🐭", name:"Souricette", line:"Ho perso il nome della mia porta !"},
     cutscene:[
-      {fox:"idle", emoji:"🏠", text:"Entriamo nella casa di legno alla fine del villaggio.", speak:"Entriamo nella casa di legno alla fine del villaggio."},
+      {fox:"idle", emoji:"🏠", text:"Entriamo nella casa di legno: Souricette non trova più il nome della sua porta.", speak:"Entriamo nella casa di legno: Souricette non trova più il nome della sua porta."},
       {pie:"vole", text:"Pipelette è passata di stanza in stanza, rubando ogni nome!", speak:"Pipelette è passata di stanza in stanza, rubando ogni nome!"},
-      {fox:"curieux", text:"Souricette non trova più la parola per la sua porta. Aiutiamola.", speak:"Souricette non trova più la parola per la sua porta. Aiutiamola."},
       {fox:"montre", text:"Guardiamo bene ogni angolo: letto, sedia, finestra… tutto ha un nome!", speak:"Guardiamo bene ogni angolo: letto, sedia, finestra, tutto ha un nome!"},
     ]
   },
@@ -81,7 +80,7 @@ const CHAPTERS = [
   {
     id:"ch-meteo", regionId:"campagne", unitId:"meteo",
     title:"Il cielo capriccioso",
-    friend:{emoji:"🌦️", name:"Madame Pluie", line:"Non so più dire che tempo fa !"},
+    friend:{emoji:"☂️", name:"Madame Pluie", line:"Non so più dire che tempo fa !"},
     cutscene:[
       {fox:"curieux", emoji:"🌦️", text:"Il cielo sopra la campagna cambia in continuazione: sole, poi nuvole…", speak:"Il cielo sopra la campagna cambia in continuazione: sole, poi nuvole."},
       {pie:"rit", text:"Pipelette si diverte a portare via le parole del tempo, una per una.", speak:"Pipelette si diverte a portare via le parole del tempo, una per una."},
@@ -102,9 +101,9 @@ const CHAPTERS = [
   {
     id:"ch-marche", regionId:"ville", unitId:"marche",
     title:"Il mercato senza nomi",
-    friend:{emoji:"🛒", name:"Jean le marchand", line:"Il mio banco è senza nomi !"},
+    friend:{emoji:"🧺", name:"Jean le marchand", line:"Il mio banco è senza nomi !"},
     cutscene:[
-      {fox:"saute", emoji:"🛒", text:"Il mercato della città è pieno di colori e profumi!", speak:"Il mercato della città è pieno di colori e profumi!"},
+      {fox:"saute", emoji:"🧺", text:"Il mercato della città è pieno di colori e profumi!", speak:"Il mercato della città è pieno di colori e profumi!"},
       {pie:"vole", text:"Ma Pipelette è volata via col sacco pieno di cipolle, carote e fiori!", speak:"Ma Pipelette è volata via col sacco pieno di cipolle, carote e fiori!"},
       {fox:"curieux", text:"Jean il mercante non sa più come chiamare quello che vende.", speak:"Jean il mercante non sa più come chiamare quello che vende."},
       {fox:"montre", text:"Rimettiamo ogni nome sul banco, così i clienti potranno comprare.", speak:"Rimettiamo ogni nome sul banco, così i clienti potranno comprare."},
@@ -125,10 +124,9 @@ const CHAPTERS = [
     title:"La stazione in confusione",
     friend:{emoji:"🚂", name:"Gaston le train", line:"Tchou tchou ! Dove vado?"},
     cutscene:[
-      {fox:"idle", emoji:"🚂", text:"Alla stazione, Gaston il treno aspetta di partire.", speak:"Alla stazione, Gaston il treno aspetta di partire."},
+      {fox:"idle", emoji:"🚂", text:"Alla stazione, Gaston il treno non sa più su quale binario andare.", speak:"Alla stazione, Gaston il treno non sa più su quale binario andare."},
       {pie:"boude", text:"Pipelette ha nascosto i nomi di tutti i mezzi di trasporto nei vagoni.", speak:"Pipelette ha nascosto i nomi di tutti i mezzi di trasporto nei vagoni."},
-      {fox:"curieux", text:"Senza i nomi, Gaston non sa più su quale binario andare.", speak:"Senza i nomi, Gaston non sa più su quale binario andare."},
-      {fox:"montre", text:"Ritroviamo macchina, bicicletta, barca e aereo: si riparte!", speak:"Ritroviamo macchina, bicicletta, barca e aereo: si riparte!"},
+      {fox:"saute", text:"Ritroviamo macchina, bicicletta, barca e aereo: si riparte!", speak:"Ritroviamo macchina, bicicletta, barca e aereo: si riparte!"},
     ]
   },
   {
@@ -147,10 +145,9 @@ const CHAPTERS = [
     title:"Il tesoro sott'acqua",
     friend:{emoji:"🦀", name:"Crabounet", line:"Clic clac ! Le parole sono in fondo al mare."},
     cutscene:[
-      {fox:"saute", emoji:"🌊", text:"Il mare! Le onde brillano e Crabounet cammina sulla sabbia.", speak:"Il mare! Le onde brillano e Crabounet cammina sulla sabbia."},
-      {pie:"vole", text:"Pipelette ha lasciato cadere il sacco proprio in mezzo alle onde!", speak:"Pipelette ha lasciato cadere il sacco proprio in mezzo alle onde!"},
-      {fox:"curieux", text:"Clic clac, dice Crabounet: le parole sono affondate con le conchiglie.", speak:"Clic clac, dice Crabounet: le parole sono affondate con le conchiglie."},
-      {fox:"montre", text:"Peschiamole una a una prima che arrivi l'alta marea!", speak:"Peschiamole una a una prima che arrivi l'alta marea!"},
+      {fox:"curieux", emoji:"🌊", text:"Il mare! Le onde brillano e Crabounet cammina sulla sabbia.", speak:"Il mare! Le onde brillano e Crabounet cammina sulla sabbia."},
+      {pie:"vole", text:"Pipelette lascia cadere il sacco tra le onde, poi si ferma su un faro a guardarci.", speak:"Pipelette lascia cadere il sacco tra le onde, poi si ferma su un faro a guardarci."},
+      {fox:"saute", text:"Clic clac, dice Crabounet: peschiamo le parole prima dell'alta marea!", speak:"Clic clac, dice Crabounet: peschiamo le parole prima dell'alta marea!"},
     ]
   },
   {
@@ -161,7 +158,7 @@ const CHAPTERS = [
       {fox:"idle", emoji:"⛰️", text:"Saliamo in montagna, tra abeti e roccia, verso la tenda di Grand Ours.", speak:"Saliamo in montagna, tra abeti e roccia, verso la tenda di Grand Ours."},
       {pie:"rit", text:"Pipelette ha svegliato l'orso portandogli via le parole della montagna!", speak:"Pipelette ha svegliato l'orso portandogli via le parole della montagna!"},
       {fox:"curieux", text:"Grand Ours brontola: senza parole non sa più raccontare le stelle.", speak:"Grand Ours brontola: senza parole non sa più raccontare le stelle."},
-      {fox:"montre", text:"Accendiamo il fuoco e ritroviamo insieme abete, stella e falò.", speak:"Accendiamo il fuoco e ritroviamo insieme abete, stella e falò."},
+      {fox:"montre", text:"Accendiamo un falò e ritroviamo insieme abete, stella e fuoco.", speak:"Accendiamo un falò e ritroviamo insieme abete, stella e fuoco."},
     ]
   },
   {
@@ -188,9 +185,9 @@ const CHAPTERS = [
   {
     id:"ch-sport", regionId:"fete", unitId:"sport",
     title:"La grande gara",
-    friend:{emoji:"🎽", name:"Coach Théo", line:"La gara non può iniziare senza parole !"},
+    friend:{emoji:"🏅", name:"Coach Théo", line:"La gara non può iniziare senza parole !"},
     cutscene:[
-      {fox:"saute", emoji:"🎽", text:"Il grande stadio della festa: tutti si preparano per la gara.", speak:"Il grande stadio della festa: tutti si preparano per la gara."},
+      {fox:"saute", emoji:"⚽", text:"Il grande stadio della festa: tutti si preparano per la gara.", speak:"Il grande stadio della festa: tutti si preparano per la gara."},
       {pie:"boude", text:"Pipelette ha rubato palla, corsa e nuoto: nessuno sa più cosa fare!", speak:"Pipelette ha rubato palla, corsa e nuoto: nessuno sa più cosa fare!"},
       {fox:"curieux", text:"Coach Théo aspetta, fischietto in mano, ma la gara non può iniziare.", speak:"Coach Théo aspetta, fischietto in mano, ma la gara non può iniziare."},
       {fox:"montre", text:"Ritroviamo tutte le parole dello sport: si parte, pronti, via!", speak:"Ritroviamo tutte le parole dello sport: si parte, pronti, via!"},
@@ -199,10 +196,10 @@ const CHAPTERS = [
   {
     id:"ch-fete", regionId:"fete", unitId:"fete", finale:true,
     title:"La grande festa",
-    friend:{emoji:"🧑‍🤝‍🧑", name:"Tous les amis", line:"On fait la fête ! Grazie per averci aiutato!"},
+    friend:{emoji:"🎂", name:"Tous les amis", line:"On fait la fête ! Grazie per averci aiutato!"},
     cutscene:[
       {pie:"boude", emoji:"🎒", text:"Pipelette arriva col sacco vuoto: ha restituito tutte le parole.", speak:"Pipelette arriva col sacco vuoto: ha restituito tutte le parole."},
-      {pie:"rit", text:"«Cra cra… volevo solo qualcuno con cui giocare!» dice la gazza.", speak:"Cra cra... volevo solo qualcuno con cui giocare! dice la gazza."},
+      {pie:"rit", text:"«Cra cra… volevo solo qualcuno con cui giocare!» dice la gazza.", speak:"Cra cra, volevo solo qualcuno con cui giocare!"},
       {fox:"saute", emoji:"🎉", text:"Allora vieni alla festa con noi! Ci sono tutti gli amici del viaggio.", speak:"Allora vieni alla festa con noi! Ci sono tutti gli amici del viaggio."},
       {fox:"salue", text:"Hai imparato il francese di tutta la Francia. Bravo ! À bientôt !", speak:"Hai imparato il francese di tutta la Francia. Bravissimo!"},
     ]
