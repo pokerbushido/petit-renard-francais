@@ -305,6 +305,10 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 }
 .game-fox.jump{animation:foxJump .7s cubic-bezier(.34,1.56,.64,1)}
 .game-fox.wobble{animation:foxWobble .5s}
+/* la mascotte dei micro-round (#gameFox in roundHead) è un .mascot, non un
+   .game-fox: stesse animazioni, stesso trigger (foxReact), classe diversa. */
+.mascot.jump{animation:foxJump .7s cubic-bezier(.34,1.56,.64,1)}
+.mascot.wobble{animation:foxWobble .5s}
 @keyframes foxJump{0%{transform:translateY(0)}35%{transform:translateY(-46px) rotate(-10deg) scale(1.12)}70%{transform:translateY(0) scale(.94)}100%{transform:translateY(0)}}
 @keyframes foxWobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg)}75%{transform:rotate(12deg)}}
 

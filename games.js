@@ -308,10 +308,12 @@ function playRound(gameId, unit, word, onDone){
   return roundExplore(unit, word, onDone); // "explore" e fallback
 }
 
-/* helper comune: intestazione con Foxy e la consegna */
+/* helper comune: intestazione con Foxy e la consegna.
+   id="gameFox" dà a foxReact() (app.js) un bersaglio: senza, "jump"/"wobble"
+   non trovano l'elemento e la reazione alla risposta sbagliata è invisibile. */
 function roundHead(pose, testo){
   return `<div class="mascot-row">
-    <div class="mascot">${foxSvg(pose, {size:84})}</div>
+    <div class="mascot" id="gameFox">${foxSvg(pose, {size:84})}</div>
     <div class="bubble">${testo}</div>
   </div>`;
 }
@@ -322,17 +324,25 @@ function roundMiss(unit, word){
   bumpMiss(unit, word, +1);
 }
 
-/* Scopri: una carta sola, si tocca e si ascolta. Non si può sbagliare. */
+/* Scopri: una carta sola, si tocca e si ascolta. Non si può sbagliare.
+   Il tocco si può ripetere (si vuole risentire la parola): solo il primo
+   fa avanzare il round, altrimenti tre tocchi rapidi salterebbero i round
+   successivi (onDone chiamato più volte). */
 function roundExplore(unit, word, onDone){
   const p = activeProfile();
   const area = $("gameArea");
+  let clicked = false;
   area.innerHTML = roundHead("montre", "Tocca la carta e ascolta!") +
     `<div class="card-grid g1"><button class="card" id="rcard">
        ${wordVisual(word)}
        ${p.mode === "read" ? `<div class="cword">${escapeHtml(word.fr)}</div>` : ""}
      </button></div>`;
   $("rcard").onclick = ()=>{
-    sfx.tap(); speak(word.fr); $("rcard").classList.add("done");
+    sfx.tap();
+    speak(word.fr);
+    if(clicked) return;
+    clicked = true;
+    $("rcard").classList.add("done");
     bumpMiss(unit, word, -1);
     setTimeout(()=> onDone(0), 1200);
   };
@@ -343,7 +353,7 @@ function roundExplore(unit, word, onDone){
 function roundFind(unit, word, p, onDone){
   const distrattori = shuffle(unit.words.filter(w => w !== word)).slice(0, 3);
   const scelte = shuffle([word, ...distrattori]);
-  let errori = 0;
+  let errori = 0, locked = false;
   const area = $("gameArea");
   area.innerHTML = roundHead("parle", "Ascolta… e tocca quella giusta!") +
     `<div class="card-grid g2" id="rgrid"></div>`;
@@ -353,7 +363,9 @@ function roundFind(unit, word, p, onDone){
     b.className = "card";
     b.innerHTML = wordVisual(w);
     b.onclick = ()=>{
+      if(locked) return;
       if(w === word){
+        locked = true;
         sfx.good(); foxReact("jump"); speak(word.fr);
         b.classList.add("ok");
         bumpMiss(unit, word, -1);
@@ -375,7 +387,7 @@ function roundFind(unit, word, p, onDone){
 function roundRead(unit, word, onDone){
   const distrattori = shuffle(unit.words.filter(w => w !== word)).slice(0, 3);
   const scelte = shuffle([word, ...distrattori]);
-  let errori = 0;
+  let errori = 0, locked = false;
   const area = $("gameArea");
   area.innerHTML = roundHead("montre", "Quale di queste è…") +
     `<div class="prompt-zone"><div class="prompt-word">${escapeHtml(word.fr)}</div></div>
@@ -386,7 +398,9 @@ function roundRead(unit, word, onDone){
     b.className = "card";
     b.innerHTML = wordVisual(w);
     b.onclick = ()=>{
+      if(locked) return;
       if(w === word){
+        locked = true;
         sfx.good(); foxReact("jump"); speak(word.fr);
         b.classList.add("ok");
         bumpMiss(unit, word, -1);
@@ -401,9 +415,17 @@ function roundRead(unit, word, onDone){
 }
 
 /* Scrivi: si compone la parola con le lettere in ordine. Solo modalità lettura.
-   Le lettere sbagliate non fanno nulla di male: si può insistere. */
+   Le lettere sbagliate non fanno nulla di male: si può insistere.
+   buildChapterRounds non filtra le parole "componibili" come fa startSpell
+   in free-play: una frase con spazi/apostrofi (es. "au revoir") darebbe
+   una tessera vuota o con l'apostrofo, illeggibile per un bambino. Si
+   applica qui lo stesso filtro di startSpell e, se fallisce, si passa
+   a Leggi (che quella parola la sa sempre gestire). */
 function roundSpell(unit, word, onDone){
-  const lettere = bareWord(word).toLowerCase().split("");
+  const parola = bareWord(word);
+  const spellable = /^[a-zàâçéèêëîïôùûüœ-]+$/i.test(parola) && parola.length <= 9;
+  if(!spellable) return roundRead(unit, word, onDone);
+  const lettere = parola.toLowerCase().split("");
   let pos = 0, errori = 0;
   const area = $("gameArea");
   area.innerHTML = roundHead("montre", "Componi la parola!") +

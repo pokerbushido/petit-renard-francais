@@ -359,7 +359,7 @@ let game = null; // stato del gioco corrente
 $("gameBack").onclick = ()=>{
   sfx.tap();
   speechSynthesis.cancel();
-  if(chapterRunning()){ chapterRun = null; renderMap(); return; }
+  if(chapterRunning()){ abortChapter(); renderMap(); return; }
   openUnit(currentUnit.id);
 };
 $("gameRepeat").onclick = ()=>{
