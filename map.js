@@ -63,9 +63,3 @@ document.getElementById("mapProfile").onclick = ()=>{ sfx.tap(); renderProfiles(
 document.getElementById("mapFree").onclick = ()=>{ sfx.tap(); goHome(false); };
 document.getElementById("mapSongs").onclick = ()=>{ sfx.tap(); renderSongs(); };
 document.getElementById("mapStickers").onclick = ()=>{ sfx.tap(); renderStickers(); };
-
-/* stub: il runner completo arriva nel task successivo (Task 9) */
-function openChapter(chapterId){
-  const c = chapterById(chapterId);
-  playCutscene(c, ()=> renderMap());
-}

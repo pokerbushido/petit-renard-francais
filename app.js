@@ -294,7 +294,7 @@ function goHome(greet){
   const unlocked = new Set(unlockedUnitIds(p));
   UNITS.filter(u => unlocked.has(u.id)).forEach((u,i)=>{
     const stars = unitStars(p, u.id);
-    const maxStars = availableGames(p).length * 3;
+    const maxStars = (availableGames(p).length + 1) * 3;  // +1 = la stella del capitolo
     const card = document.createElement("button");
     card.className = "unit-card";
     card.style.background = u.color;
@@ -359,6 +359,7 @@ let game = null; // stato del gioco corrente
 $("gameBack").onclick = ()=>{
   sfx.tap();
   speechSynthesis.cancel();
+  if(chapterRunning()){ chapterRun = null; renderMap(); return; }
   openUnit(currentUnit.id);
 };
 $("gameRepeat").onclick = ()=>{

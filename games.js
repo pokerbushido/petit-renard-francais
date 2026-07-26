@@ -295,3 +295,204 @@ function startSpell(u){
   }
   playRound();
 }
+
+/* ---------- micro-round per il runner dei capitoli ----------
+   Riusa la logica dei giochi su una sola parola e richiama
+   onDone(errori) invece di finishGame. */
+function playRound(gameId, unit, word, onDone){
+  const p = activeProfile();
+  if(gameId === "find")        return roundFind(unit, word, p, onDone);
+  if(gameId === "read")        return roundRead(unit, word, onDone);
+  if(gameId === "spell")       return roundSpell(unit, word, onDone);
+  if(gameId === "memory")      return roundMemory(unit, word, p, onDone);
+  return roundExplore(unit, word, onDone); // "explore" e fallback
+}
+
+/* helper comune: intestazione con Foxy e la consegna */
+function roundHead(pose, testo){
+  return `<div class="mascot-row">
+    <div class="mascot">${foxSvg(pose, {size:84})}</div>
+    <div class="bubble">${testo}</div>
+  </div>`;
+}
+/* helper comune: reazione all'errore. Mai un fallimento, solo un invito a riprovare. */
+function roundMiss(unit, word){
+  sfx.bad();
+  foxReact("wobble");
+  bumpMiss(unit, word, +1);
+}
+
+/* Scopri: una carta sola, si tocca e si ascolta. Non si può sbagliare. */
+function roundExplore(unit, word, onDone){
+  const p = activeProfile();
+  const area = $("gameArea");
+  area.innerHTML = roundHead("montre", "Tocca la carta e ascolta!") +
+    `<div class="card-grid g1"><button class="card" id="rcard">
+       ${wordVisual(word)}
+       ${p.mode === "read" ? `<div class="cword">${escapeHtml(word.fr)}</div>` : ""}
+     </button></div>`;
+  $("rcard").onclick = ()=>{
+    sfx.tap(); speak(word.fr); $("rcard").classList.add("done");
+    bumpMiss(unit, word, -1);
+    setTimeout(()=> onDone(0), 1200);
+  };
+  setTimeout(()=> speak(word.fr), 400);
+}
+
+/* Trova!: ascolta la parola, tocca l'immagine giusta fra quattro. */
+function roundFind(unit, word, p, onDone){
+  const distrattori = shuffle(unit.words.filter(w => w !== word)).slice(0, 3);
+  const scelte = shuffle([word, ...distrattori]);
+  let errori = 0;
+  const area = $("gameArea");
+  area.innerHTML = roundHead("parle", "Ascolta… e tocca quella giusta!") +
+    `<div class="card-grid g2" id="rgrid"></div>`;
+  const grid = $("rgrid");
+  scelte.forEach(w=>{
+    const b = document.createElement("button");
+    b.className = "card";
+    b.innerHTML = wordVisual(w);
+    b.onclick = ()=>{
+      if(w === word){
+        sfx.good(); foxReact("jump"); speak(word.fr);
+        b.classList.add("ok");
+        bumpMiss(unit, word, -1);
+        setTimeout(()=> onDone(errori), 1100);
+      }else{
+        errori++;
+        roundMiss(unit, word);
+        b.classList.add("nope");
+        b.disabled = true;
+        speak(word.fr);   /* si riascolta: si può sempre riprovare */
+      }
+    };
+    grid.appendChild(b);
+  });
+  setTimeout(()=> speak(word.fr), 500);
+}
+
+/* Leggi: la parola scritta, si tocca l'immagine giusta. Solo modalità lettura. */
+function roundRead(unit, word, onDone){
+  const distrattori = shuffle(unit.words.filter(w => w !== word)).slice(0, 3);
+  const scelte = shuffle([word, ...distrattori]);
+  let errori = 0;
+  const area = $("gameArea");
+  area.innerHTML = roundHead("montre", "Quale di queste è…") +
+    `<div class="prompt-zone"><div class="prompt-word">${escapeHtml(word.fr)}</div></div>
+     <div class="card-grid g2" id="rgrid"></div>`;
+  const grid = $("rgrid");
+  scelte.forEach(w=>{
+    const b = document.createElement("button");
+    b.className = "card";
+    b.innerHTML = wordVisual(w);
+    b.onclick = ()=>{
+      if(w === word){
+        sfx.good(); foxReact("jump"); speak(word.fr);
+        b.classList.add("ok");
+        bumpMiss(unit, word, -1);
+        setTimeout(()=> onDone(errori), 1100);
+      }else{
+        errori++; roundMiss(unit, word);
+        b.classList.add("nope"); b.disabled = true;
+      }
+    };
+    grid.appendChild(b);
+  });
+}
+
+/* Scrivi: si compone la parola con le lettere in ordine. Solo modalità lettura.
+   Le lettere sbagliate non fanno nulla di male: si può insistere. */
+function roundSpell(unit, word, onDone){
+  const lettere = bareWord(word).toLowerCase().split("");
+  let pos = 0, errori = 0;
+  const area = $("gameArea");
+  area.innerHTML = roundHead("montre", "Componi la parola!") +
+    `<div class="prompt-zone">
+       ${promptVisual(word)}
+       <div class="spell-slots" id="rslots">${lettere.map(()=>'<div class="spell-slot"></div>').join("")}</div>
+     </div>
+     <div class="spell-tiles" id="rtiles"></div>`;
+  const slots = [...area.querySelectorAll(".spell-slot")];
+  const tiles = $("rtiles");
+  shuffle(lettere.map((ch,i)=>({ch,i}))).forEach(t=>{
+    const b = document.createElement("button");
+    b.className = "spell-tile";
+    b.textContent = t.ch;
+    b.onclick = ()=>{
+      if(b.classList.contains("used")) return;
+      if(t.ch === lettere[pos]){
+        sfx.tap();
+        slots[pos].textContent = t.ch;
+        slots[pos].classList.add("filled");
+        b.classList.add("used");
+        pos++;
+        if(pos === lettere.length){
+          sfx.good(); foxReact("jump"); speak(word.fr);
+          bumpMiss(unit, word, -1);
+          setTimeout(()=> onDone(errori), 1300);
+        }
+      }else{
+        errori++; roundMiss(unit, word);
+        b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
+      }
+    };
+    tiles.appendChild(b);
+  });
+  setTimeout(()=> speak(word.fr), 400);
+}
+
+/* Memory: tre coppie soltanto (la parola del round più due distrattori),
+   così sta dentro il minuto. */
+function roundMemory(unit, word, p, onDone){
+  const trio = [word, ...shuffle(unit.words.filter(w => w !== word)).slice(0, 2)];
+  const mostraTesto = p.mode === "read";
+  const carte = shuffle(trio.flatMap((w,i) => [
+    {w, i, face:"visual"},
+    {w, i, face: mostraTesto ? "text" : "visual"}
+  ]));
+  let aperta = null, bloccato = false, trovate = 0, errori = 0;
+
+  const area = $("gameArea");
+  area.innerHTML = roundHead("curieux", "Trova le coppie!") +
+    `<div class="card-grid g3" id="rgrid"></div>`;
+  const grid = $("rgrid");
+
+  carte.forEach((c, idx)=>{
+    const b = document.createElement("button");
+    b.className = "card mcard";
+    b.dataset.idx = idx;
+    b.innerHTML = `<div class="mback">?</div>`;
+    b.onclick = ()=>{
+      if(bloccato || b.classList.contains("open") || b.classList.contains("ok")) return;
+      sfx.flip();
+      b.classList.add("open");
+      b.innerHTML = c.face === "text"
+        ? `<div class="mword">${escapeHtml(c.w.fr)}</div>`
+        : wordVisual(c.w, "memoji");
+      speak(c.w.fr);
+
+      if(!aperta){ aperta = {b, c}; return; }
+
+      if(aperta.c.i === c.i && aperta.b !== b){
+        sfx.good();
+        aperta.b.classList.add("ok"); b.classList.add("ok");
+        aperta = null; trovate++;
+        if(trovate === trio.length){
+          foxReact("jump");
+          bumpMiss(unit, word, -1);
+          setTimeout(()=> onDone(errori), 1000);
+        }
+      }else{
+        errori++;
+        roundMiss(unit, word);
+        bloccato = true;
+        const a = aperta; aperta = null;
+        setTimeout(()=>{
+          [a.b, b].forEach(x=>{ x.classList.remove("open"); x.innerHTML = `<div class="mback">?</div>`; });
+          bloccato = false;
+        }, 900);
+      }
+    };
+    grid.appendChild(b);
+  });
+}
