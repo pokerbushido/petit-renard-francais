@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const FILES = ["data.js", "story.js", "mascot.js"]; // i task successivi aggiungono progress.js
+const FILES = ["data.js", "story.js", "mascot.js", "progress.js"];
 
 const ctx = createContext({ window: {}, console });
 for (const name of FILES) {
@@ -165,6 +165,147 @@ check("ogni emoji di capitolo ha un asset scaricato", () => {
       }
     }
   }
+});
+
+const P = G(`({chapterIndex, isChapterDone, isChapterGold, currentChapterIndex,
+  isChapterUnlocked, completeChapterPatch, unlockedUnitIds, availableGameIds,
+  nextGameFor, buildChapterRounds, migrateV1, STORAGE_KEY_V2})`);
+
+const profile = (over = {}) => ({
+  id:"p1", name:"Test", avatar:"🦊", mode:"read", scores:{}, chapters:{}, ...over
+});
+
+check("il primo capitolo è sempre sbloccato, il secondo no", () => {
+  const p = profile();
+  assert.equal(P.isChapterUnlocked(p, CHAPTERS[0].id), true);
+  assert.equal(P.isChapterUnlocked(p, CHAPTERS[1].id), false);
+});
+
+check("completare un capitolo sblocca il successivo", () => {
+  const p = profile();
+  const p2 = {...p, ...P.completeChapterPatch(p, CHAPTERS[0].id, 2)};
+  assert.equal(P.isChapterDone(p2, CHAPTERS[0].id), true);
+  assert.equal(P.isChapterUnlocked(p2, CHAPTERS[1].id), true);
+});
+
+check("un capitolo completato con errori dà la stella ma non l'oro", () => {
+  const p = profile();
+  const p2 = {...p, ...P.completeChapterPatch(p, CHAPTERS[0].id, 3)};
+  assert.equal(P.isChapterDone(p2, CHAPTERS[0].id), true);
+  assert.equal(P.isChapterGold(p2, CHAPTERS[0].id), false);
+});
+
+check("rigiocarlo senza errori dà l'oro e non toglie mai il done", () => {
+  const p = profile();
+  const p2 = {...p, ...P.completeChapterPatch(p, CHAPTERS[0].id, 3)};
+  const p3 = {...p2, ...P.completeChapterPatch(p2, CHAPTERS[0].id, 0)};
+  assert.equal(P.isChapterGold(p3, CHAPTERS[0].id), true);
+  const p4 = {...p3, ...P.completeChapterPatch(p3, CHAPTERS[0].id, 5)};
+  assert.equal(P.isChapterDone(p4, CHAPTERS[0].id), true, "il done non si perde mai");
+  assert.equal(P.isChapterGold(p4, CHAPTERS[0].id), true, "l'oro non si perde mai");
+});
+
+check("completeChapterPatch non muta il profilo di partenza", () => {
+  const p = profile();
+  const before = JSON.stringify(p);
+  P.completeChapterPatch(p, CHAPTERS[0].id, 0);
+  assert.equal(JSON.stringify(p), before, "mutazione del profilo originale");
+});
+
+check("un capitolo completato resta rigiocabile", () => {
+  const p = profile();
+  const p2 = {...p, ...P.completeChapterPatch(p, CHAPTERS[0].id, 0)};
+  assert.equal(P.isChapterUnlocked(p2, CHAPTERS[0].id), true);
+});
+
+check("gioca libero mostra solo le unità dei capitoli sbloccati", () => {
+  // Array.from: unlockedUnitIds nasce da .map() su CHAPTERS del realm vm,
+  // deepEqual fallirebbe per identità di realm pur essendo lo stesso contenuto.
+  const p = profile();
+  assert.deepEqual(Array.from(P.unlockedUnitIds(p)), [CHAPTERS[0].unitId]);
+  const p2 = {...p, ...P.completeChapterPatch(p, CHAPTERS[0].id, 0)};
+  assert.deepEqual(Array.from(P.unlockedUnitIds(p2)), [CHAPTERS[0].unitId, CHAPTERS[1].unitId]);
+});
+
+check("la modalità ascolto esclude i giochi di lettura", () => {
+  assert.deepEqual(Array.from(P.availableGameIds(profile({mode:"listen"}))), ["explore","find","memory"]);
+  assert.equal(P.availableGameIds(profile({mode:"read"})).length, 5);
+});
+
+check("la ri-proposta avviene sempre in un gioco diverso", () => {
+  const avail = ["explore","find","memory","read","spell"];
+  for (const last of avail) {
+    for (let i = 0; i < 20; i++) {
+      assert.notEqual(P.nextGameFor(last, avail), last, `nextGameFor ha ripetuto ${last}`);
+    }
+  }
+});
+
+check("con un solo gioco disponibile nextGameFor non va in loop", () => {
+  assert.equal(P.nextGameFor("explore", ["explore"]), "explore");
+});
+
+check("un capitolo produce n round giocabili e mai due volte lo stesso gioco di fila", () => {
+  const u = UNITS.find(x => x.id === CHAPTERS[0].unitId);
+  const rounds = P.buildChapterRounds(u, profile(), P.availableGameIds(profile()), 6);
+  assert.equal(rounds.length, 6);
+  for (const r of rounds) {
+    assert.ok(r.word && r.gameId, "round malformato");
+    assert.ok(u.words.includes(r.word), "parola fuori dall'unità del capitolo");
+  }
+  for (let i = 1; i < rounds.length; i++) {
+    assert.notEqual(rounds[i].gameId, rounds[i-1].gameId, "due round consecutivi con lo stesso gioco");
+  }
+});
+
+check("le parole sbagliate in passato compaiono per prime", () => {
+  const u = UNITS.find(x => x.id === CHAPTERS[0].unitId);
+  const hard = u.words[u.words.length - 1];
+  const p = profile({miss: {[`${u.id}|${hard.fr}`]: 3}});
+  const rounds = P.buildChapterRounds(u, p, P.availableGameIds(p), 6);
+  assert.ok(rounds.some(r => r.word === hard), "la parola sbagliata non è stata ri-proposta");
+});
+
+check("la migrazione conserva stelle, nome e avatar", () => {
+  const v1 = {profiles:[{id:"a", name:"Bimbo", avatar:"🐼", mode:"listen",
+    scores:{[CHAPTERS[0].unitId]:{explore:3, find:2}}, miss:{x:1}}], activeId:"a"};
+  const v2 = P.migrateV1(v1);
+  assert.equal(v2.profiles[0].name, "Bimbo");
+  assert.equal(v2.profiles[0].avatar, "🐼");
+  assert.deepEqual(v2.profiles[0].scores, v1.profiles[0].scores);
+  assert.deepEqual(v2.profiles[0].miss, v1.profiles[0].miss);
+  assert.equal(v2.activeId, "a");
+});
+
+check("la migrazione segna come fatti i capitoli dei mondi già giocati", () => {
+  const v1 = {profiles:[{id:"a", name:"B", avatar:"🦊", mode:"read",
+    scores:{[CHAPTERS[0].unitId]:{explore:3}, [CHAPTERS[1].unitId]:{find:1}}}], activeId:"a"};
+  const p = P.migrateV1(v1).profiles[0];
+  assert.equal(P.isChapterDone(p, CHAPTERS[0].id), true);
+  assert.equal(P.isChapterDone(p, CHAPTERS[1].id), true);
+  assert.equal(P.isChapterDone(p, CHAPTERS[2].id), false);
+  assert.equal(P.isChapterUnlocked(p, CHAPTERS[2].id), true, "deve poter continuare da lì");
+});
+
+check("la migrazione si ferma al primo buco, non salta avanti", () => {
+  const v1 = {profiles:[{id:"a", name:"B", avatar:"🦊", mode:"read",
+    scores:{[CHAPTERS[0].unitId]:{explore:3}, [CHAPTERS[3].unitId]:{find:3}}}], activeId:"a"};
+  const p = P.migrateV1(v1).profiles[0];
+  assert.equal(P.isChapterDone(p, CHAPTERS[0].id), true);
+  assert.equal(P.isChapterDone(p, CHAPTERS[1].id), false);
+  assert.equal(P.isChapterDone(p, CHAPTERS[3].id), false,
+    "un mondo giocato fuori sequenza non deve sbloccare mezzo percorso");
+});
+
+check("la migrazione regge input corrotti senza lanciare", () => {
+  for (const bad of [null, {}, {profiles:null}, {profiles:[{}]}, "spazzatura", {profiles:[{id:"x"}]}]) {
+    const out = P.migrateV1(bad);
+    assert.ok(Array.isArray(out.profiles), `migrateV1(${JSON.stringify(bad)}) non ha prodotto profiles`);
+  }
+});
+
+check("la chiave v2 è diversa dalla v1", () => {
+  assert.equal(P.STORAGE_KEY_V2, "petitrenard_v2");
 });
 
 console.log(`✅ ${checks} check passati (${UNITS.length} unità, ${UNITS.reduce((n,u)=>n+u.words.length,0)} parole, ${CHAPTERS.length} capitoli)`);
