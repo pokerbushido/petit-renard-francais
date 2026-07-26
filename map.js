@@ -13,6 +13,10 @@ function renderMap(){
   $("mapStars").innerHTML = `<span class="star">⭐</span> ${totalStars(p)}`;
 
   const cur = currentChapterIndex(p);
+  /* a viaggio finito currentChapterIndex torna CHAPTERS.length: nessun i
+     lo eguaglia mai, quindi senza questa clamp Foxy sparirebbe dalla mappa
+     proprio nel momento del trionfo. La si parcheggia sull'ultimo nodo. */
+  const curNode = Math.min(cur, CHAPTERS.length - 1);
   const list = $("pathList");
   list.innerHTML = "";
   let lastRegion = null, block = list;
@@ -29,7 +33,7 @@ function renderMap(){
       sign.className = "region-sign";
       sign.style.background = r.color;
       sign.innerHTML = `<div class="rfr">${r.fr}</div><div class="rit">${r.it}</div>`;
-      if(r.id === (CHAPTERS[Math.min(cur, CHAPTERS.length-1)] || {}).regionId) sign.classList.add("now");
+      if(r.id === (CHAPTERS[curNode] || {}).regionId) sign.classList.add("now");
       block.appendChild(sign);
       list.appendChild(block);
     }
@@ -37,7 +41,7 @@ function renderMap(){
     const done = isChapterDone(p, c.id);
     const gold = isChapterGold(p, c.id);
     const open = isChapterUnlocked(p, c.id);
-    const isCurrent = i === cur;
+    const isCurrent = i === curNode;
 
     const node = document.createElement(open ? "button" : "div");
     node.className = "node" + (done ? " done" : "") + (gold ? " gold" : "") +

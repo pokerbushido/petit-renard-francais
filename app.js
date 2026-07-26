@@ -183,6 +183,9 @@ function foxReact(cls){
   const f = $("gameFox"); if(!f) return;
   f.classList.remove("jump","wobble"); void f.offsetWidth;
   f.classList.add(cls);
+  /* la reazione non è infinite: senza rimuovere la classe a fine corsa, la
+     volpe resta congelata (niente più idleBob) fino al prossimo round. */
+  f.addEventListener("animationend", ()=> f.classList.remove(cls), {once:true});
 }
 function show(screenId){
   /* ogni cambio schermata azzera il parlato pendente: niente voce residua
@@ -482,7 +485,10 @@ function stopSong(){
   songTimers.forEach(clearTimeout);
   songTimers = [];
   document.querySelectorAll(".song-line").forEach(l=>l.classList.remove("now"));
-  const fox = $("songFox"); if(fox) fox.classList.remove("dance");
+  /* la danza è la posa "saute" della volpe SVG, non una classe CSS sul
+     contenitore: fermando la canzone si torna alla posa "idle", altrimenti
+     resterebbe a saltare in silenzio sulla lista delle canzoni. */
+  const fox = $("songFox"); if(fox) fox.innerHTML = foxSvg("idle", {size:64});
   const play = $("songPlay");
   if(play){ play.dataset.playing = ""; play.innerHTML = "▶️ Suona!"; }
 }
@@ -494,7 +500,9 @@ function playSong(song){
   const play = $("songPlay");
   play.dataset.playing = "1";
   play.innerHTML = "⏹️ Stop";
-  $("songFox").classList.add("dance");
+  /* niente classe "dance" sul contenitore: la posa "saute" dell'SVG balla
+     da sola, così non si somma a un'animazione del wrapper (v. has-svg). */
+  $("songFox").innerHTML = foxSvg("saute", {size:64});
   const beat = 60 / song.tempo;
   const lines = [...document.querySelectorAll(".song-line")];
   let t = 0.2;
@@ -533,7 +541,7 @@ function openSong(songId){
   stopSong();
   const s = SONGS.find(x=>x.id===songId);
   $("songHead").innerHTML = `
-    <div class="song-fox" id="songFox">${em("🦊")}</div>
+    <div class="song-fox has-svg" id="songFox">${foxSvg("idle", {size:64})}</div>
     <h2>${em(s.emoji)} ${s.title}</h2>`;
   const box = $("songLines");
   box.innerHTML = "";

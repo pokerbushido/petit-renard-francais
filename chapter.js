@@ -103,7 +103,7 @@ function chapterChallenge(token){
   const area = $("gameArea");
   area.innerHTML = `
     <div class="mascot-row">
-      <div class="mascot">${pieSvg("rit", {size:90})}</div>
+      <div class="mascot has-svg">${pieSvg("rit", {size:90})}</div>
       <div class="bubble">Cra cra ! Prendi le tue parole… se ci riesci !</div>
     </div>`;
   speak("Cra cra! Prendi le tue parole, se ci riesci!", {lang:"it-IT", rate:1, noRepeat:true});
@@ -137,7 +137,7 @@ function finishChapter(token){
   setDots(0, []);
   $("gameArea").innerHTML = `
     <div class="win-zone">
-      <div class="wmascot">${foxSvg("saute", {size:140})}</div>
+      <div class="wmascot has-svg">${foxSvg("saute", {size:140})}</div>
       <h2>${wasDone ? "Ancora più bravo !" : "Chapitre terminé !"}</h2>
       <div class="chapter-prize">
         <div class="prize-emoji">${em(r.chapter.friend.emoji)}</div>

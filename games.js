@@ -67,7 +67,7 @@ function startFind(u, p){
         <div class="hint">${showText ? `<span class="fr-word">${target.fr}</span>` : "Ascolta e tocca!"}</div>
       </div>
       <div class="card-grid g4" id="findGrid"></div>
-      <div class="game-fox" id="gameFox">${em("🦊")}</div>`;
+      <div class="game-fox has-svg" id="gameFox">${foxSvg("idle", {size:56})}</div>`;
     $("bigAudio").onclick = ()=>speak(target.fr);
     const grid = $("findGrid");
     options.forEach((w,i)=>{
@@ -120,7 +120,7 @@ function startMemory(u, p){
   const area = $("gameArea");
   area.innerHTML = `
     <div class="mascot-row">
-      <div class="mascot">${em("🦊")}</div>
+      <div class="mascot has-svg">${foxSvg("curieux", {size:88})}</div>
       <div class="bubble">Trova le coppie! ${showText ? "Unisci figura e parola." : ""}</div>
     </div>
     <div class="mem-grid" id="memGrid"></div>`;
@@ -313,7 +313,7 @@ function playRound(gameId, unit, word, onDone){
    non trovano l'elemento e la reazione alla risposta sbagliata è invisibile. */
 function roundHead(pose, testo){
   return `<div class="mascot-row">
-    <div class="mascot" id="gameFox">${foxSvg(pose, {size:84})}</div>
+    <div class="mascot has-svg" id="gameFox">${foxSvg(pose, {size:84})}</div>
     <div class="bubble">${testo}</div>
   </div>`;
 }

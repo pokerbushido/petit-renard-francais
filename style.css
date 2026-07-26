@@ -74,7 +74,11 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 /* ---------- mascotte + fumetto ---------- */
 .mascot-row{display:flex;align-items:flex-end;gap:12px;margin:6px 0 20px}
 .mascot{font-size:3.4rem;line-height:1;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18));animation:idleBob 3s ease-in-out infinite;transform-origin:bottom center}
-.mascot.has-svg{animation:none;font-size:0}
+/* filter:none oltre ad animation:none: .mascot-svg (sezione MASCOTTE SVG)
+   ha già la sua ombra. Senza azzerare anche quella qui, il contenitore
+   applica la SUA ombra al risultato già ombreggiato dell'SVG dentro —
+   un'ombra doppia, non solo un doppio movimento. */
+.mascot.has-svg{animation:none;font-size:0;filter:none}
 @keyframes idleBob{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(-4px)}}
 .bubble{
   position:relative;background:var(--white);border:var(--card-border);
@@ -239,7 +243,10 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 /* ---------- schermata vittoria ---------- */
 .win-zone{text-align:center;padding:30px 10px}
 .win-zone .wmascot{font-size:5rem;display:inline-block;animation:winDance .8s cubic-bezier(.34,1.56,.64,1) infinite alternate}
-.win-zone .wmascot.has-svg{animation:none;font-size:0}
+/* v. commento su .mascot.has-svg: qui non c'è un filter di base sul
+   contenitore, ma il "none" esplicito rende innocuo il pattern anche se
+   in futuro qualcuno ne aggiungesse uno. */
+.win-zone .wmascot.has-svg{animation:none;font-size:0;filter:none}
 @keyframes winDance{from{transform:rotate(-8deg) translateY(0)}to{transform:rotate(8deg) translateY(-12px)}}
 .win-zone h2{font-size:2rem;margin:12px 0 4px}
 .win-zone .wstars{font-size:3rem;letter-spacing:8px;margin:10px 0}
@@ -307,13 +314,22 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
   pointer-events:none;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18));
   transform-origin:bottom center;animation:idleBob 3s ease-in-out infinite;
 }
-.game-fox.jump{animation:foxJump .7s cubic-bezier(.34,1.56,.64,1)}
+/* con l'SVG dentro, il contenitore non deve più animarsi né ombreggiare da
+   solo: lo fa già .mascot-svg (style.css sopra). Regola messa PRIMA di
+   .jump/.wobble: a parità di specificità vince l'ultima nel foglio, quindi
+   la reazione resta visibile anche quando #gameFox ha anche .has-svg. */
+.game-fox.has-svg{animation:none;font-size:0;filter:none}
+.game-fox.jump{animation:foxCelebrate .7s cubic-bezier(.34,1.56,.64,1)}
 .game-fox.wobble{animation:foxWobble .5s}
 /* la mascotte dei micro-round (#gameFox in roundHead) è un .mascot, non un
    .game-fox: stesse animazioni, stesso trigger (foxReact), classe diversa. */
-.mascot.jump{animation:foxJump .7s cubic-bezier(.34,1.56,.64,1)}
+.mascot.jump{animation:foxCelebrate .7s cubic-bezier(.34,1.56,.64,1)}
 .mascot.wobble{animation:foxWobble .5s}
-@keyframes foxJump{0%{transform:translateY(0)}35%{transform:translateY(-46px) rotate(-10deg) scale(1.12)}70%{transform:translateY(0) scale(.94)}100%{transform:translateY(0)}}
+/* nome distinto da @keyframes foxJump (sezione MASCOTTE SVG, .fox-saute):
+   stesso nome con keyframe diverso qui creava una doppia dichiarazione —
+   vinceva l'ultima nel foglio e la reazione "jump" suonava con l'arco
+   sbagliato (quello, più piatto, pensato per il salto in loop di Foxy). */
+@keyframes foxCelebrate{0%{transform:translateY(0)}35%{transform:translateY(-46px) rotate(-10deg) scale(1.12)}70%{transform:translateY(0) scale(.94)}100%{transform:translateY(0)}}
 @keyframes foxWobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg)}75%{transform:rotate(12deg)}}
 
 /* canzoni */
@@ -328,8 +344,9 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .song-head{text-align:center;margin:4px 0 14px}
 .song-head h2{font-size:1.7rem}
 .song-fox{font-size:4rem;line-height:1.1;display:inline-block;transform-origin:bottom center}
-.song-fox.dance{animation:foxDance .55s ease-in-out infinite alternate}
-@keyframes foxDance{from{transform:rotate(-10deg) translateY(0)}to{transform:rotate(10deg) translateY(-10px)}}
+/* la volpe balla cambiando posa SVG (v. playSong/stopSong in app.js), non
+   con una classe di animazione sul contenitore: niente doppia animazione. */
+.song-fox.has-svg{font-size:0}
 .song-lines{max-width:560px;margin:0 auto}
 .song-line{
   display:block;width:100%;text-align:center;font-size:1.25rem;font-weight:600;
