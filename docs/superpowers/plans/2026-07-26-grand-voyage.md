@@ -1132,9 +1132,13 @@ function nextBeat(){
   $("cutNext").textContent = isLast ? "Si gioca! ▶️" : "Avanti ➡️";
 }
 
-$("cutNext").onclick = ()=>{ sfx.tap(); nextBeat(); };
-$("cutSkip").onclick = ()=>{ sfx.tap(); endCutscene(); };
-$("cutStage").onclick = ()=>{ nextBeat(); };
+/* Questi tre binding girano al caricamento dello script, quando app.js non è
+   ancora stato eseguito e `$` (const, non hoisted) non esiste: qui si usa
+   document.getElementById direttamente. Dentro le funzioni sopra `$` va bene,
+   perché vengono chiamate a pagina caricata. */
+document.getElementById("cutNext").onclick = ()=>{ sfx.tap(); nextBeat(); };
+document.getElementById("cutSkip").onclick = ()=>{ sfx.tap(); endCutscene(); };
+document.getElementById("cutStage").onclick = ()=>{ nextBeat(); };
 ```
 
 - [ ] **Step 3: Stile e animazioni**
@@ -1278,10 +1282,12 @@ function renderMap(){
   if(currentNode) currentNode.scrollIntoView({block:"center", behavior:"smooth"});
 }
 
-$("mapProfile").onclick = ()=>{ sfx.tap(); renderProfiles(); };
-$("mapFree").onclick = ()=>{ sfx.tap(); goHome(false); };
-$("mapSongs").onclick = ()=>{ sfx.tap(); renderSongs(); };
-$("mapStickers").onclick = ()=>{ sfx.tap(); renderStickers(); };
+/* Binding al caricamento dello script: app.js non è ancora girato e `$`
+   (const, non hoisted) non esiste ancora. Vedi la stessa nota in cutscene.js. */
+document.getElementById("mapProfile").onclick = ()=>{ sfx.tap(); renderProfiles(); };
+document.getElementById("mapFree").onclick = ()=>{ sfx.tap(); goHome(false); };
+document.getElementById("mapSongs").onclick = ()=>{ sfx.tap(); renderSongs(); };
+document.getElementById("mapStickers").onclick = ()=>{ sfx.tap(); renderStickers(); };
 ```
 
 - [ ] **Step 3: Stile del sentiero**
