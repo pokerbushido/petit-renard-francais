@@ -149,4 +149,22 @@ check("i capitoli sono raggruppati per regione senza salti", () => {
     "una regione compare in due blocchi non contigui: l'ordine dei capitoli è sbagliato");
 });
 
+check("ogni emoji di capitolo ha un asset scaricato", () => {
+  const mapSrc = readFileSync(join(ROOT, "assets-map.js"), "utf8");
+  for (const c of CHAPTERS) {
+    // Check friend emoji
+    if (c.friend && c.friend.emoji) {
+      assert.ok(mapSrc.includes(`"${c.friend.emoji}"`),
+        `capitolo ${c.id}: friend emoji ${c.friend.emoji} ("${c.friend.name}") manca in assets-map.js — esegui python3 tools/fetch_assets.py`);
+    }
+    // Check cutscene emoji
+    for (const b of c.cutscene) {
+      if (b.emoji) {
+        assert.ok(mapSrc.includes(`"${b.emoji}"`),
+          `capitolo ${c.id}: emoji di scena ${b.emoji} manca in assets-map.js — esegui python3 tools/fetch_assets.py`);
+      }
+    }
+  }
+});
+
 console.log(`✅ ${checks} check passati (${UNITS.length} unità, ${UNITS.reduce((n,u)=>n+u.words.length,0)} parole, ${CHAPTERS.length} capitoli)`);
