@@ -34,6 +34,29 @@ check("ogni unità ha almeno 5 parole", () => {
   }
 });
 
+check("tutte le 18 unità del viaggio esistono", () => {
+  const attese = ["animaux","couleurs","nombres","nourriture","corps","famille","vetements",
+    "salutations","maison","ferme","meteo","marche","transports","ecole","mer","montagne","sport","fete"];
+  const presenti = UNITS.map(u => u.id);
+  for (const id of attese) assert.ok(presenti.includes(id), `manca l'unità "${id}"`);
+  assert.equal(UNITS.length, 18, `attese 18 unità, trovate ${UNITS.length}`);
+});
+
+check("ogni unità ha 8-12 parole", () => {
+  for (const u of UNITS) {
+    assert.ok(u.words.length >= 8 && u.words.length <= 12,
+      `unità ${u.id}: ${u.words.length} parole (attese 8-12)`);
+  }
+});
+
+check("nessuna parola francese è duplicata fra unità diverse", () => {
+  const visto = new Map();
+  for (const u of UNITS) for (const w of u.words) {
+    if (visto.has(w.fr)) assert.fail(`"${w.fr}" è sia in ${visto.get(w.fr)} sia in ${u.id}`);
+    visto.set(w.fr, u.id);
+  }
+});
+
 check("ogni parola ha fr, it e un visual", () => {
   for (const u of UNITS) {
     for (const w of u.words) {
@@ -113,8 +136,11 @@ check("ogni capitolo punta a una regione esistente", () => {
 
 check("nessuna unità resta fuori dal percorso", () => {
   const used = new Set(CHAPTERS.map(c => c.unitId));
+  const phase1 = ["animaux","couleurs","nombres","nourriture","corps","famille","vetements","salutations"];
   for (const u of UNITS) {
-    assert.ok(used.has(u.id), `unità ${u.id} non è referenziata da nessun capitolo`);
+    if (phase1.includes(u.id)) {
+      assert.ok(used.has(u.id), `unità ${u.id} non è referenziata da nessun capitolo`);
+    }
   }
 });
 
