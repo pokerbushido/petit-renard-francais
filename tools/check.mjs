@@ -142,15 +142,8 @@ check("ogni capitolo punta a una regione esistente", () => {
 
 check("nessuna unità resta fuori dal percorso", () => {
   const used = new Set(CHAPTERS.map(c => c.unitId));
-  // Fase 2: i capitoli arrivano nel Task 12. Questa eccezione deve sparire lì:
-  // il secondo ciclo la fa fallire non appena un capitolo referenzia queste unità.
-  const senzaCapitolo = ["maison","ferme","meteo","marche","transports","ecole","mer","montagne","sport","fete"];
   for (const u of UNITS) {
-    if (senzaCapitolo.includes(u.id)) continue;
     assert.ok(used.has(u.id), `unità ${u.id} non è referenziata da nessun capitolo`);
-  }
-  for (const id of senzaCapitolo) {
-    assert.ok(!used.has(id), `l'unità ${id} ha ora un capitolo: togli "${id}" dall'eccezione di fase 2`);
   }
 });
 
@@ -201,6 +194,28 @@ check("ogni emoji di capitolo ha un asset scaricato", () => {
       }
     }
   }
+});
+
+check("il viaggio ha 18 capitoli nell'ordine narrativo previsto", () => {
+  assert.equal(CHAPTERS.length, 18, `attesi 18 capitoli, trovati ${CHAPTERS.length}`);
+  const atteso = ["salutations","famille","maison","couleurs","ferme","animaux","meteo",
+    "nombres","marche","nourriture","transports","ecole","mer","montagne","vetements",
+    "corps","sport","fete"];
+  // Array.from: CHAPTERS.map() nasce nel realm vm, deepEqual tra realm diversi
+  // fallisce con "same structure but not reference-equal" pur essendo identico.
+  assert.deepEqual(Array.from(CHAPTERS.map(c => c.unitId)), atteso,
+    "l'ordine dei capitoli non segue il viaggio villaggio → campagna → città → costa → festa");
+});
+
+check("le cinque regioni sono tutte usate", () => {
+  const usate = new Set(CHAPTERS.map(c => c.regionId));
+  for (const r of REGIONS) assert.ok(usate.has(r.id), `regione ${r.id} senza capitoli`);
+});
+
+check("l'ultimo capitolo è la festa finale", () => {
+  const last = CHAPTERS[CHAPTERS.length - 1];
+  assert.equal(last.regionId, "fete");
+  assert.ok(last.finale === true, "l'ultimo capitolo deve avere finale:true");
 });
 
 const P = G(`({chapterIndex, isChapterDone, isChapterGold, currentChapterIndex,
