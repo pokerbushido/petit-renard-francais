@@ -95,6 +95,8 @@ La mappa diventa la schermata principale dopo la scelta del profilo. La griglia 
 | `mascot.js` | generatore SVG di Foxy e Pipelette, pose ed espressioni | nuovo |
 | `cutscene.js` | motore delle scene (timeline, fumetti, voce, skip) | nuovo |
 | `map.js` | schermata avventura, nodi, sblocchi | nuovo |
+| `progress.js` | logica pura di progressione e migrazione, zero DOM | nuovo |
+| `chapter.js` | runner di un capitolo: cutscene → round → sfida → premio | nuovo |
 | `games.js` | i cinque giochi, estratti da `app.js` | nuovo (estrazione) |
 | `app.js` | stato, profili, routing, audio, canzoni, album | esistente, ridotto a ~300 righe |
 | `assets-map.js` | mappa emoji → file | esistente, rigenerato |
@@ -119,9 +121,11 @@ Chiave `petitrenard_v1` → `petitrenard_v2`. Alla prima apertura, per ogni prof
 
 ## Verifica
 
-Il repo non ha framework di test e non ne introduce. Un solo check eseguibile:
+Il repo non ha framework di test e non ne introduce. Un solo check eseguibile, `node tools/check.mjs`: carica i file dati in un contesto `node:vm` (non sono moduli ES, sono script con globali) e verifica gli invarianti con `node:assert`.
 
-`tools/check_data.py` — fallisce se: una parola non ha un asset corrispondente in `assets-map.js`; un capitolo di `story.js` referenzia un `unitId` inesistente in `data.js`; un'unità non è referenziata da nessun capitolo; un capitolo ha meno di 5 parole giocabili.
+Copre due cose. **Dati:** una parola senza asset in `assets-map.js`, un capitolo che referenzia un `unitId` inesistente, un'unità fuori dal percorso, un capitolo con troppe o troppo poche parole, una parola francese duplicata fra mondi. **Logica di progressione:** sblocchi, stella d'oro, immutabilità delle patch, ri-proposta in un gioco diverso, e soprattutto la migrazione v1 → v2 anche su input corrotto.
+
+Scelto Node invece di Python (che la spec inizialmente prevedeva come `tools/check_data.py`) perché la logica da testare è JavaScript: un solo strumento copre dati e logica, invece di due.
 
 Verifica manuale su iPad Safari a fine di ogni fase: percorso completo di un capitolo, cutscene, skip, rigiocata di un nodo completato, e caricamento di un profilo migrato dalla v1.
 
