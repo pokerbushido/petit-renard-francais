@@ -13,7 +13,7 @@ function startExplore(u){
   const showText = p.mode === "read";
   area.innerHTML = `
     <div class="mascot-row">
-      <div class="mascot">${em("🦊")}</div>
+      <div class="mascot">${foxSvg("montre", {size:88})}</div>
       <div class="bubble">Tocca ogni carta e ascolta! Tocca tutto per vincere la stella!</div>
     </div>
     <div class="card-grid g4" id="exploreGrid"></div>`;
