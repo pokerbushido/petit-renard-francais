@@ -98,65 +98,7 @@ function totalStars(p){
 }
 function hasSticker(p, unitId){ return unitStars(p, unitId) >= STICKER_THRESHOLD; }
 
-/* ============================================================
-   AUDIO — Web Speech API (francese) + effetti WebAudio
-   ============================================================ */
-let frVoice = null, itVoice = null;
-function pickVoices(){
-  const vs = speechSynthesis.getVoices();
-  if(!vs.length) return;
-  const frAll = vs.filter(v=>v.lang && v.lang.toLowerCase().startsWith("fr"));
-  // preferenza: fr-FR, voci "premium/enhanced" prima
-  const score = v => (v.lang.toLowerCase()==="fr-fr"?10:0) + (/thomas|am[eé]lie|audrey|aurelie|premium|enhanced|natural/i.test(v.name)?5:0) + (v.localService?1:0);
-  frVoice = frAll.sort((a,b)=>score(b)-score(a))[0] || null;
-  itVoice = vs.find(v=>v.lang && v.lang.toLowerCase().startsWith("it")) || null;
-}
-if("speechSynthesis" in window){
-  pickVoices();
-  speechSynthesis.onvoiceschanged = pickVoices;
-}
-
-let lastSpeakText = "";
-function speak(text, opts = {}){
-  if(!("speechSynthesis" in window)) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = opts.lang || "fr-FR";
-  if(u.lang.startsWith("fr") && frVoice) u.voice = frVoice;
-  if(u.lang.startsWith("it") && itVoice) u.voice = itVoice;
-  u.rate = opts.rate || 0.82;   // lento, per bambini
-  u.pitch = opts.pitch || 1.05;
-  if(!opts.noRepeat) lastSpeakText = u.lang.startsWith("fr") ? text : lastSpeakText;
-  speechSynthesis.speak(u);
-}
-
-let audioCtx = null;
-function ctx(){
-  if(!audioCtx){
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if(AC) audioCtx = new AC();
-  }
-  if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-  return audioCtx;
-}
-function tone(freq, start, dur, type="sine", vol=0.18){
-  const c = ctx(); if(!c) return;
-  const o = c.createOscillator(), g = c.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.setValueAtTime(0, c.currentTime + start);
-  g.gain.linearRampToValueAtTime(vol, c.currentTime + start + 0.02);
-  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + start + dur);
-  o.connect(g); g.connect(c.destination);
-  o.start(c.currentTime + start); o.stop(c.currentTime + start + dur + 0.05);
-}
-const sfx = {
-  tap:   () => tone(520, 0, .08, "triangle", .1),
-  good:  () => { tone(660,0,.12,"triangle"); tone(880,.11,.2,"triangle"); },
-  bad:   () => tone(160, 0, .25, "square", .08),
-  flip:  () => tone(420, 0, .07, "sine", .1),
-  win:   () => { [523,659,784,1047].forEach((f,i)=>tone(f, i*.13, .22, "triangle")); },
-  star:  () => { tone(1200,0,.1,"sine",.12); tone(1600,.08,.15,"sine",.12); },
-};
+/* AUDIO (speak, stopSpeech, musica, sfx) → audio.js */
 
 /* ============================================================
    CORIANDOLI
@@ -198,8 +140,13 @@ function show(screenId){
   /* ogni cambio schermata azzera il parlato pendente: niente voce residua
      dopo che il bambino è già altrove. playCutscene chiama show() PRIMA di
      nextBeat(), quindi la prima battuta della cutscene parte dopo questo
-     cancel e non viene mai tagliata. */
-  if("speechSynthesis" in window) speechSynthesis.cancel();
+     stop e non viene mai tagliata. */
+  stopSpeech();
+  /* la musica segue la schermata, non il singolo evento: dentro un gioco
+     il tema ritmato, ovunque altro quello del viaggio. playMusic ignora la
+     chiamata se la traccia è già quella giusta, così non riparte da capo a
+     ogni round. */
+  playMusic(screenId === "screen-game" ? "jeu" : "aventure");
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   const el = $(screenId);
   el.classList.remove("active");
@@ -215,6 +162,23 @@ function shuffle(arr){
   }
   return a;
 }
+/* ============================================================
+   LEGGIBILITÀ SUI FONDI COLORATI
+   Ogni mondo ha il suo colore, e le etichette ci stavano sopra
+   sempre in bianco: su giallo e azzurro chiaro il contrasto
+   scendeva a 1.6:1, ben sotto il 4.5:1 che serve al testo piccolo.
+   Invece di spegnere i colori, è il testo a scegliere l'inchiostro.
+   ============================================================ */
+function relLuminance(hex){
+  const n = parseInt(hex.slice(1), 16);
+  const ch = v => { v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
+  return 0.2126*ch(n>>16 & 255) + 0.7152*ch(n>>8 & 255) + 0.0722*ch(n & 255);
+}
+/* true = il fondo è chiaro, il testo va scritto in inchiostro scuro */
+function isLightBg(hex){
+  return typeof hex === "string" && /^#[0-9a-f]{6}$/i.test(hex) && relLuminance(hex) > 0.30;
+}
+
 function starsStr(n, max=3){
   return "⭐".repeat(n) + "☆".repeat(Math.max(0,max-n));
 }
@@ -306,10 +270,10 @@ $("npCreate").onclick = ()=>{
    HOME
    ============================================================ */
 const HOME_PHRASES = [
-  "Salut! Scegli un mondo e giochiamo!",
-  "Bonjour! Oggi che mondo esploriamo?",
-  "Ogni gioco vinto = stelle! ⭐",
-  "Vinci 6 stelle in un mondo per la figurina! 🏆",
+  "Salut ! Scegli un mondo e giochiamo!",
+  "Bonjour ! Oggi che mondo esploriamo?",
+  "On y va ! Ogni gioco vinto = stelle ⭐",
+  "Six étoiles in un mondo = una figurina! 🏆",
 ];
 function goHome(greet){
   const p = activeProfile();
@@ -326,7 +290,7 @@ function goHome(greet){
     const stars = unitStars(p, u.id);
     const maxStars = (availableGames(p).length + 1) * 3;  // +1 = la stella del capitolo
     const card = document.createElement("button");
-    card.className = "unit-card";
+    card.className = "unit-card" + (isLightBg(u.color) ? " on-light" : "");
     card.style.background = u.color;
     card.style.setProperty("--d", i*50+"ms");
     card.innerHTML = `
@@ -358,7 +322,7 @@ function openUnit(unitId){
   const u = currentUnit;
   $("unitHero").innerHTML = `
     <div class="uemoji">${em(u.emoji)}</div>
-    <h2 style="color:${u.color}">${u.fr}</h2>
+    <h2 style="--u-color:${u.color}">${u.fr}</h2>
     <div class="uit">${u.it}</div>`;
   $("unitStarChip").innerHTML = `<span class="star">⭐</span> ${unitStars(p,u.id)}`;
   const list = $("gameList");
@@ -388,7 +352,7 @@ let game = null; // stato del gioco corrente
 
 $("gameBack").onclick = ()=>{
   sfx.tap();
-  speechSynthesis.cancel();
+  stopSpeech();
   if(chapterRunning()){ abortChapter(); renderMap(); return; }
   /* sulla schermata di ricompensa del capitolo chapterRunning() è già
      false: openChapter (chapter.js) azzera currentUnit all'inizio del
@@ -445,8 +409,8 @@ function finishGame(gameId, stars, u){
       <div class="wstars">${[0,1,2].map(i=>`<span data-i="${i}">${i<stars?"⭐":"☆"}</span>`).join("")}</div>
       ${newSticker ? `<div style="font-size:1.3rem;font-weight:700;margin:8px 0">🏆 Hai vinto la figurina <b>${u.fr}</b>!</div>` : ""}
       <div class="win-actions">
-        <button class="btn sun" id="winAgain">🔁 Ancora!</button>
-        <button class="btn primary" id="winNext">➡️ Continua</button>
+        <button class="btn sun" id="winAgain">🔁 Encore !</button>
+        <button class="btn primary" id="winNext">➡️ Continue</button>
       </div>
     </div>`;
   area.querySelectorAll(".wstars span").forEach((s,i)=>{
@@ -487,10 +451,16 @@ $("stickBack").onclick = ()=>{ sfx.tap(); renderMap(); };
 /* ============================================================
    CHANSONS — karaoke di filastrocche (melodie WebAudio)
    ============================================================ */
-let songTimers = [];
+let songTimers = [], songNodes = [];
 function stopSong(){
   songTimers.forEach(clearTimeout);
   songTimers = [];
+  /* le note sono già tutte schedulate sul contesto WebAudio: senza spegnere
+     gli oscillatori, "Stop" fermava solo l'evidenziazione del verso e la
+     melodia proseguiva da sola fino in fondo. */
+  songNodes.forEach(o => { try{ o.stop(); }catch(e){} });
+  songNodes = [];
+  resumeMusic();
   document.querySelectorAll(".song-line").forEach(l=>l.classList.remove("now"));
   /* la danza è la posa "saute" della volpe SVG, non una classe CSS sul
      contenitore: fermando la canzone si torna alla posa "idle", altrimenti
@@ -502,7 +472,8 @@ function stopSong(){
 function midiFreq(m){ return 440 * Math.pow(2, (m - 69) / 12); }
 function playSong(song){
   stopSong();
-  speechSynthesis.cancel();
+  stopSpeech();
+  suspendMusic();   // il sottofondo tacerebbe sopra la melodia
   const c = ctx(); if(!c) return;
   const play = $("songPlay");
   play.dataset.playing = "1";
@@ -519,7 +490,8 @@ function playSong(song){
       if(lines[li]) lines[li].classList.add("now");
     }, t * 1000));
     line.notes.forEach(([midi, dur])=>{
-      tone(midiFreq(midi), t, dur * beat * 0.9, "triangle", 0.16);
+      const node = tone(midiFreq(midi), t, dur * beat * 0.9, "triangle", 0.16);
+      if(node) songNodes.push(node);
       t += dur * beat;
     });
     t += beat * 0.5; // respiro tra i versi
@@ -570,7 +542,18 @@ function openSong(songId){
 }
 $("homeSongs").onclick = ()=>{ sfx.tap(); renderSongs(); };
 $("songsBack").onclick = ()=>{ sfx.tap(); stopSong(); renderMap(); };
-$("songBack").onclick = ()=>{ sfx.tap(); stopSong(); speechSynthesis.cancel(); renderSongs(); };
+$("songBack").onclick = ()=>{ sfx.tap(); stopSong(); stopSpeech(); renderSongs(); };
+
+/* toggle musica: unico bottone, sempre nello stesso posto in tutte le schermate */
+(function bindMusicToggle(){
+  const btn = $("musicToggle");
+  const paint = on => {
+    btn.textContent = on ? "🎵" : "🔇";
+    btn.classList.toggle("off", !on);
+  };
+  paint(musicEnabled());
+  btn.onclick = ()=>{ sfx.tap(); paint(setMusicEnabled(!musicEnabled())); };
+})();
 
 /* ============================================================
    NUVOLE DECORATIVE

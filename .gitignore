@@ -1,0 +1,5 @@
+# chiavi API: vivono in ~/.config, mai nel repo
+*.env
+.env*
+!.env.example
+.DS_Store

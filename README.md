@@ -6,7 +6,9 @@ Web app per bambini (5-7 anni) per imparare il vocabolario francese di base, isp
 
 Apri `index.html` in un browser (Chrome/Safari, anche su tablet), o servi la cartella con un qualsiasi hosting statico. Nessuna dipendenza esterna a runtime.
 
-L'audio francese usa la **Web Speech API** del browser (voci di sistema fr-FR): su Mac/iPad le voci sono di ottima qualità. Il primo suono parte dopo il primo tocco (requisito iOS).
+L'audio francese usa le **clip registrate** in `audio/` quando ci sono, e ripiega
+sulla **Web Speech API** del browser (voci di sistema fr-FR) per tutto ciò che
+manca. Il primo suono parte dopo il primo tocco (requisito iOS).
 
 ## Contenuti
 
@@ -64,14 +66,96 @@ Nessun build step: tutto `<script>` classici, caricati in ordine di dipendenza
 - `map.js` — la mappa a nodi sequenziale
 - `chapter.js` — il runner dei capitoli (cutscene → micro-round → sfida → ricompensa)
 - `games.js` — i cinque mini-giochi, sia in modalità libera sia come micro-round
-- `app.js` — stato, storage, audio, profili, home, avvio dell'app
+- `audio.js` — voce (clip registrate + ripiego sulla voce di sistema), musica di
+  sottofondo con ducking, effetti WebAudio
+- `app.js` — stato, storage, profili, home, avvio dell'app
 - `style.css` — tutto lo stile e le animazioni (CSS puro, nessuna libreria)
 - `tools/check.mjs` — 42 asserzioni sugli invarianti di dati e progressione
+- `tools/tts.mjs` — genera offline le clip vocali (`--check` per il self-test)
 - `tools/fetch_assets.py` — scarica gli asset emoji Noto usati in `assets-map.js`
+
+## 🇫🇷 Bilingue
+
+L'app è francese con appoggio italiano, non italiana con qualche parola
+francese. Due regole, applicate ovunque:
+
+**Interfaccia** — francese in evidenza, italiano in piccolo sotto
+(`Découvre` / *Scopri · tocca e ascolta*). Chi legge impara a riconoscere le
+parole francesi; chi non legge ancora resta guidato da icone e voce. Il
+markup è `<b>` francese + `<small>` italiano, lo stile è in fondo a
+`style.css`.
+
+**Racconto** — Foxy narra in italiano e chiude ogni capitolo con una
+frase-chiave francese, mostrata su un cartellino che si accende quando viene
+pronunciata (`fr` + `frIt` in `story.js`). È il modello dei cartoni bilingui:
+la storia resta comprensibile anche al bambino di 5 anni che non legge, e il
+francese entra senza spezzare il racconto.
+
+Le due lingue stanno in **campi separati**, mai concatenate in una stringa
+sola. Il motivo è la pronuncia: una frase mista letta da una voce sola
+sbaglierebbe per forza una delle due lingue. Così la narrazione va alla voce
+italiana e la frase francese a quella francese, incatenate da `opts.onEnd`
+di `speak()`.
+
+## 🔊 Voce registrata
+
+Le voci di sistema suonano robotiche. `tools/tts.mjs` genera **una volta sola,
+offline**, una clip per ogni frase dell'app e la salva in `audio/`; il browser
+suona quelle. Girare offline è una scelta di sicurezza, non di comodità: una
+chiave API dentro una pagina pubblica su GitHub Pages sarebbe leggibile — e
+spendibile — da chiunque apra il sorgente.
+
+    node tools/tts.mjs --count     # quante frasi e quanti caratteri servono
+    node tools/tts.mjs --voices    # elenca le voci del tuo account
+    TTS_VOICE_FR=<id> TTS_VOICE_IT=<id> node tools/tts.mjs
+
+La chiave va in `~/.config/carlo-os/elevenlabs.env`
+(`ELEVENLABS_API_KEY=...`, permessi `600`) oppure in `$ELEVENLABS_API_KEY`.
+**Mai nel repo.** La chiave in uso ha solo *Text to Speech* e lettura voci:
+se trapelasse non potrebbe clonare voci né toccare l'account.
+
+Due voci, una per lingua, perché la pronuncia è il prodotto:
+
+| | voce | `voice_id` |
+|---|---|---|
+| francese | *Foxy FR*, creata con Voice Design | `MIzJ6RArwnuvlFsl7dOz` |
+| italiano | *Andrea — Young & Expressive* | `mxbgw5PwaQHOrln90mhH` |
+
+> ⚠️ Le voci della Voice Library **non funzionano via API sul piano free**
+> (`402 paid_plan_required`): restano solo voci anglofone, che leggerebbero il
+> francese con accento inglese. Serve un piano a pagamento.
+
+Lo script è idempotente: salta le clip già su disco, quindi se la quota mensile
+finisce a metà basta rilanciarlo il mese dopo. Al termine riscrive
+`audio/index.json`, che elenca solo le clip realmente presenti: quelle mancanti
+tornano automaticamente alla voce di sistema, l'app non si rompe mai.
+
+Stato attuale: 278 clip, ~6.200 caratteri (il piano free ElevenLabs ne dà
+10.000 al mese). Aggiungendo frasi nuove in `app.js` o `chapter.js`, vanno
+aggiunte anche alla lista `HARDCODED` in `tools/tts.mjs`.
 
 ## Grafica
 
 Emoji **Noto** di Google (animate dove disponibili, PNG statici altrove), scaricate in `assets/` da `tools/fetch_assets.py`. Licenza Noto Emoji: Apache 2.0 / OFL. Per rigenerare gli asset dopo aver aggiunto parole: `python3 tools/fetch_assets.py`.
+
+Carattere **Fredoka** (SIL Open Font License 1.1), sottoinsieme latino
+auto-ospitato in `fonts/`: niente CDN, funziona anche offline.
+
+Lo stile è quello degli albi illustrati francesi anni '60 — carta con grana,
+pigmenti a gouache, superfici che sembrano ritagli di carta spessa. Il colore
+del testo sulle carte colorate lo sceglie `isLightBg()` in `app.js`: sui fondi
+chiari il bianco scendeva a 1.6:1 di contrasto, illeggibile.
+
+## 🎶 Musica
+
+Due loop in `music/`, uno per il viaggio e uno per i giochi, con abbassamento
+automatico quando qualcuno parla e spegnimento durante le chansons.
+
+> *Carefree* e *Fluffing a Duck* di **Kevin MacLeod** (incompetech.com)
+> Licenza [Creative Commons BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+
+La licenza CC BY obbliga a mantenere il credito visibile: sta nella schermata
+dei profili, oltre che qui. Non rimuoverlo.
 
 ## Deploy
 

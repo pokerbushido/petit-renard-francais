@@ -37,7 +37,7 @@ function renderMap(){
       block.className = "region-block";
       block.style.background = r.sky;
       const sign = document.createElement("div");
-      sign.className = "region-sign";
+      sign.className = "region-sign" + (isLightBg(r.color) ? " on-light" : "");
       sign.style.background = r.color;
       sign.innerHTML = `<div class="rfr">${r.fr}</div><div class="rit">${r.it}</div>`;
       if(r.id === (CHAPTERS[curNode] || {}).regionId) sign.classList.add("now");
@@ -63,6 +63,12 @@ function renderMap(){
     if(open) node.onclick = ()=>{ sfx.tap(); openChapter(c.id); };
     block.appendChild(node);
   });
+
+  /* la luce della pagina segue il viaggio: il cielo della regione in cui ci
+     si trova tinge lo sfondo di tutta l'app (v. --amb in style.css), così
+     arrivare al mare o alla festa si vede prima ancora di leggere il cartello */
+  const curRegion = REGIONS.find(r => r.id === (CHAPTERS[curNode] || {}).regionId);
+  if(curRegion) document.body.style.setProperty("--amb", curRegion.sky);
 
   show("screen-map");
   const currentNode = list.querySelector(".node.current");

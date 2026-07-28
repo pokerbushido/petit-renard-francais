@@ -249,12 +249,15 @@ const UNITS = [
 ];
 
 const AVATARS = ["🦊","🐸","🐼","🦄","🐯","🐙"];
+/* name = francese (quello che si impara), sub = italiano (quello che
+   spiega cosa fare). Stessa regola delle carte-parola: la lingua da
+   imparare in grande, la lingua che si sa già in piccolo sotto. */
 const GAMES = [
-  {id:"explore", emoji:"🔍", name:"Scopri", sub:"Tocca e ascolta le parole"},
-  {id:"find",    emoji:"👂", name:"Trova!", sub:"Ascolta e tocca quella giusta"},
-  {id:"memory",  emoji:"🃏", name:"Memory", sub:"Trova le coppie"},
-  {id:"read",    emoji:"📖", name:"Leggi", sub:"Abbina la parola scritta", readerOnly:true},
-  {id:"spell",   emoji:"✏️", name:"Scrivi", sub:"Componi la parola", readerOnly:true},
+  {id:"explore", emoji:"🔍", name:"Découvre", sub:"Scopri · tocca e ascolta"},
+  {id:"find",    emoji:"👂", name:"Trouve !", sub:"Trova · ascolta e tocca"},
+  {id:"memory",  emoji:"🃏", name:"Mémory",   sub:"Memory · trova le coppie"},
+  {id:"read",    emoji:"📖", name:"Lis",      sub:"Leggi · abbina la parola", readerOnly:true},
+  {id:"spell",   emoji:"✏️", name:"Écris",    sub:"Scrivi · componi la parola", readerOnly:true},
 ];
 const STICKER_THRESHOLD = 6; // stelle nell'unità per vincere la figurina
 

@@ -16,10 +16,16 @@
   <!-- ==================== PROFILI ==================== -->
   <section id="screen-profiles" class="screen">
     <h1 class="app-title">🦊 Le Petit Renard <span class="fr">· Français!</span></h1>
-    <p class="app-sub">Chi gioca oggi?</p>
+    <p class="app-sub"><b>Qui joue aujourd'hui ?</b><small>Chi gioca oggi?</small></p>
     <div class="profile-grid" id="profileList"></div>
     <p class="storage-notice" id="storageNotice" hidden>
       ℹ️ I progressi non si stanno salvando su questo dispositivo al momento.
+    </p>
+    <!-- La licenza CC BY della musica richiede che il credito sia visibile
+         a chi usa l'opera, non solo nel README del repo. -->
+    <p class="credits">
+      Musica: <em>Carefree</em> e <em>Fluffing a Duck</em> — Kevin MacLeod
+      (incompetech.com), licenza CC BY 4.0
     </p>
   </section>
 
@@ -28,18 +34,19 @@
     <div class="topbar">
       <button class="btn round" id="npBack">⬅️</button>
     </div>
-    <h1 class="app-title">Crea il tuo personaggio</h1>
-    <p class="form-step">1 · Scegli chi sei</p>
+    <h1 class="app-title">Ton personnage</h1>
+    <p class="app-sub"><small>Crea il tuo personaggio</small></p>
+    <p class="form-step">1 · <b>Qui es-tu ?</b><small>Scegli chi sei</small></p>
     <div class="avatar-pick" id="avatarPick"></div>
-    <p class="form-step">2 · Scrivi il tuo nome</p>
-    <input class="name-input" id="nameInput" maxlength="12" placeholder="Il tuo nome…" autocomplete="off">
-    <p class="form-step" style="margin-top:18px">3 · Come vuoi giocare?</p>
+    <p class="form-step">2 · <b>Ton prénom</b><small>Scrivi il tuo nome</small></p>
+    <input class="name-input" id="nameInput" maxlength="12" placeholder="Ton prénom…" autocomplete="off">
+    <p class="form-step" style="margin-top:18px">3 · <b>Comment jouer ?</b><small>Come vuoi giocare</small></p>
     <div class="mode-pick" id="modePick">
-      <button data-mode="listen"><span class="big">👂</span>Solo ascolto<br><small>per i più piccoli</small></button>
-      <button data-mode="read"><span class="big">📖</span>Ascolto + lettura<br><small>per chi sa leggere</small></button>
+      <button data-mode="listen"><span class="big">👂</span>Écoute<br><small>Solo ascolto · per i più piccoli</small></button>
+      <button data-mode="read"><span class="big">📖</span>Écoute et lis<br><small>Ascolto + lettura · per chi sa leggere</small></button>
     </div>
     <div style="text-align:center;margin-top:10px">
-      <button class="btn primary" id="npCreate" style="font-size:1.3rem">✨ Via si gioca!</button>
+      <button class="btn primary" id="npCreate" style="font-size:1.3rem">✨ On y va !</button>
     </div>
   </section>
 
@@ -49,9 +56,9 @@
       <button class="chip" id="mapProfile">🦊 …</button>
       <span class="spacer"></span>
       <button class="chip" id="mapStars"><span class="star">⭐</span> 0</button>
-      <button class="btn round sun" id="mapFree" title="Gioca libero">🎮</button>
-      <button class="btn round sun" id="mapSongs" title="Canzoni">🎵</button>
-      <button class="btn round sun" id="mapStickers" title="Grand Livre">🏆</button>
+      <button class="btn round sun" id="mapFree" title="Joue ! · Gioca libero">🎮</button>
+      <button class="btn round sun" id="mapSongs" title="Chansons · Canzoni">🎵</button>
+      <button class="btn round sun" id="mapStickers" title="Le Grand Livre · Album">🏆</button>
     </div>
     <p class="storage-notice" id="mapStorageNotice" hidden>
       ℹ️ I progressi non si stanno salvando su questo dispositivo al momento.
@@ -66,8 +73,8 @@
       <button class="chip" id="homeProfile">🦊 …</button>
       <span class="spacer"></span>
       <button class="chip" id="homeStars"><span class="star">⭐</span> 0</button>
-      <button class="btn round sun" id="homeSongs" title="Canzoni">🎵</button>
-      <button class="btn round sun" id="homeStickers" title="Album figurine">🏆</button>
+      <button class="btn round sun" id="homeSongs" title="Chansons · Canzoni">🎵</button>
+      <button class="btn round sun" id="homeStickers" title="Le Grand Livre · Album">🏆</button>
     </div>
     <div class="mascot-row">
       <div class="mascot" id="homeMascot">🦊</div>
@@ -92,7 +99,7 @@
     <div class="game-head">
       <button class="btn round" id="gameBack">⬅️</button>
       <div class="progress-dots" id="gameDots"></div>
-      <button class="btn round sun" id="gameRepeat" title="Riascolta">🔊</button>
+      <button class="btn round sun" id="gameRepeat" title="Écoute ! · Riascolta">🔊</button>
     </div>
     <div id="gameArea"></div>
   </section>
@@ -107,9 +114,10 @@
       <div class="cut-actor pie" id="cutPie"></div>
     </div>
     <div class="cut-bubble" id="cutBubble"></div>
+    <div class="cut-fr" id="cutFr" hidden></div>
     <div class="cut-actions">
-      <button class="btn small" id="cutSkip">Salta ⏭️</button>
-      <button class="btn primary" id="cutNext">Avanti ➡️</button>
+      <button class="btn small" id="cutSkip">Passe ⏭️</button>
+      <button class="btn primary" id="cutNext">Suite ➡️</button>
     </div>
   </section>
 
@@ -120,7 +128,7 @@
       <span class="spacer"></span>
     </div>
     <h1 class="app-title">📖 Le Grand Livre</h1>
-    <p class="app-sub">Ogni capitolo che completi rimette le sue parole nel libro!</p>
+    <p class="app-sub"><small>Ogni capitolo che completi rimette le sue parole nel libro!</small></p>
     <div class="sticker-grid" id="stickerGrid"></div>
   </section>
 
@@ -131,7 +139,7 @@
       <span class="spacer"></span>
     </div>
     <h1 class="app-title">🎵 Les chansons</h1>
-    <p class="app-sub">Canta con Foxy! Tocca un verso per sentirlo.</p>
+    <p class="app-sub"><small>Canta con Foxy! Tocca un verso per sentirlo.</small></p>
     <div style="max-width:520px;margin:0 auto" id="songList"></div>
   </section>
 
@@ -143,15 +151,18 @@
     </div>
     <div class="song-head" id="songHead"></div>
     <div class="song-actions">
-      <button class="btn primary" id="songPlay" style="font-size:1.3rem">▶️ Suona!</button>
+      <button class="btn primary" id="songPlay" style="font-size:1.3rem">▶️ Chante !</button>
     </div>
     <div class="song-lines" id="songLines"></div>
     <p class="song-hint">Tocca un verso per sentirlo letto in francese 🔊</p>
   </section>
 
+  <button class="music-toggle" id="musicToggle" title="Musica" aria-label="Accendi o spegni la musica">🎵</button>
+
 </div>
 <script src="data.js"></script>
 <script src="story.js"></script>
+<script src="audio.js"></script>
 <script src="progress.js"></script>
 <script src="assets-map.js"></script>
 <script src="mascot.js"></script>
