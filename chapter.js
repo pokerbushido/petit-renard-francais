@@ -138,15 +138,15 @@ function finishChapter(token){
   $("gameArea").innerHTML = `
     <div class="win-zone">
       <div class="wmascot has-svg">${foxSvg("saute", {size:140})}</div>
-      <h2>${wasDone ? "Ancora più bravo !" : "Chapitre terminé !"}</h2>
+      <h2>${wasDone ? "Encore mieux !" : "Chapitre terminé !"}</h2>
       <div class="chapter-prize">
         <div class="prize-emoji">${em(r.chapter.friend.emoji)}</div>
         <div>Le parole di <b>${escapeHtml(r.chapter.title)}</b> sono tornate nel Grand Livre!</div>
       </div>
       <div class="wstars">${gold ? "🌟" : "⭐"}</div>
       <div class="win-actions">
-        <button class="btn sun" id="chAgain">🔁 Ancora!</button>
-        <button class="btn primary" id="chNext">🗺️ Continua il viaggio</button>
+        <button class="btn sun" id="chAgain">🔁 Encore !</button>
+        <button class="btn primary" id="chNext">🗺️ On continue !</button>
       </div>
     </div>`;
   speak(r.errors === 0 ? "Parfait !" : "Bravo !", {rate:0.9});

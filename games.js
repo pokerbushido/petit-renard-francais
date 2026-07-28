@@ -64,7 +64,7 @@ function startFind(u, p){
     area.innerHTML = `
       <div class="prompt-zone">
         <button class="big-audio" id="bigAudio">🔊</button>
-        <div class="hint">${showText ? `<span class="fr-word">${target.fr}</span>` : "Ascolta e tocca!"}</div>
+        <div class="hint">${showText ? `<span class="fr-word">${target.fr}</span>` : "<b>Écoute et touche !</b><small>Ascolta e tocca</small>"}</div>
       </div>
       <div class="card-grid g4" id="findGrid"></div>
       <div class="game-fox has-svg" id="gameFox">${foxSvg("idle", {size:56})}</div>`;
@@ -121,7 +121,7 @@ function startMemory(u, p){
   area.innerHTML = `
     <div class="mascot-row">
       <div class="mascot has-svg">${foxSvg("curieux", {size:88})}</div>
-      <div class="bubble">Trova le coppie! ${showText ? "Unisci figura e parola." : ""}</div>
+      <div class="bubble"><b>Trouve les paires !</b><small>Trova le coppie${showText ? " · unisci figura e parola" : ""}</small></div>
     </div>
     <div class="mem-grid" id="memGrid"></div>`;
   const grid = $("memGrid");
@@ -332,7 +332,7 @@ function roundExplore(unit, word, onDone){
   const p = activeProfile();
   const area = $("gameArea");
   let clicked = false;
-  area.innerHTML = roundHead("montre", "Tocca la carta e ascolta!") +
+  area.innerHTML = roundHead("montre", "<b>Écoute !</b><small>Tocca la carta e ascolta</small>") +
     `<div class="card-grid g1"><button class="card" id="rcard">
        ${wordVisual(word)}
        ${p.mode === "read" ? `<div class="cword">${escapeHtml(word.fr)}</div>` : ""}
@@ -357,7 +357,7 @@ function roundFind(unit, word, p, onDone){
   const scelte = shuffle([word, ...distrattori]);
   let errori = 0, locked = false;
   const area = $("gameArea");
-  area.innerHTML = roundHead("parle", "Ascolta… e tocca quella giusta!") +
+  area.innerHTML = roundHead("parle", "<b>Écoute et touche !</b><small>Ascolta e tocca quella giusta</small>") +
     `<div class="card-grid g2" id="rgrid"></div>`;
   const grid = $("rgrid");
   scelte.forEach(w=>{
@@ -392,7 +392,7 @@ function roundRead(unit, word, onDone){
   const scelte = shuffle([word, ...distrattori]);
   let errori = 0, locked = false;
   const area = $("gameArea");
-  area.innerHTML = roundHead("montre", "Quale di queste è…") +
+  area.innerHTML = roundHead("montre", "<b>C'est lequel ?</b><small>Quale di queste è…</small>") +
     `<div class="prompt-zone"><div class="prompt-word">${escapeHtml(word.fr)}</div></div>
      <div class="card-grid g2" id="rgrid"></div>`;
   const grid = $("rgrid");
@@ -431,7 +431,7 @@ function roundSpell(unit, word, onDone){
   const lettere = parola.toLowerCase().split("");
   let pos = 0, errori = 0;
   const area = $("gameArea");
-  area.innerHTML = roundHead("montre", "Componi la parola!") +
+  area.innerHTML = roundHead("montre", "<b>Écris le mot !</b><small>Componi la parola</small>") +
     `<div class="prompt-zone">
        ${promptVisual(word)}
        <div class="spell-slots" id="rslots">${lettere.map(()=>'<div class="spell-slot"></div>').join("")}</div>
@@ -479,7 +479,7 @@ function roundMemory(unit, word, p, onDone){
   let aperta = null, bloccato = false, trovate = 0, errori = 0;
 
   const area = $("gameArea");
-  area.innerHTML = roundHead("curieux", "Trova le coppie!") +
+  area.innerHTML = roundHead("curieux", "<b>Trouve les paires !</b><small>Trova le coppie</small>") +
     `<div class="card-grid g3" id="rgrid"></div>`;
   const grid = $("rgrid");
 

@@ -1,21 +1,41 @@
 /* ============================================================
-   LE PETIT RENARD — toybox gouache aesthetic
-   carta crema + card chunky + palette caramella + bordi inchiostro
+   LE PETIT RENARD — album illustrato francese
+   Riferimento: gli albi Père Castor / Alain Grée degli anni '60.
+   Non "colori da app per bambini" ma pigmenti a gouache stampati
+   su carta ruvida: crema calda, vermiglio, ocra, blu Gauloise.
+   Le superfici sono ritagli di carta spessa, non rettangoli:
+   bordo d'inchiostro, spessore solido sotto, ombra portata morbida.
    ============================================================ */
+
+/* Il font era dichiarato ma non è mai stato caricato: senza @font-face
+   ogni dispositivo cadeva su un ripiego diverso (Chalkboard su Mac,
+   Comic Sans altrove) e l'app cambiava faccia da schermo a schermo.
+   Sottoinsieme latino, che copre tutti gli accenti francesi. */
+@font-face{
+  font-family:'Fredoka';
+  src:url('fonts/fredoka-latin.woff2') format('woff2');
+  font-weight:400 600;
+  font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+20AC,U+2122;
+}
+
 :root{
-  --paper:#FFF6E9;
-  --paper-deep:#FFEDD1;
-  --ink:#3D2B24;
-  --ink-soft:#7A6258;
-  --coral:#FF6B57;
-  --sunflower:#FFC53D;
-  --leaf:#5CB85C;
-  --sky:#4FA8E8;
-  --grape:#9B6BD4;
-  --bubblegum:#F272B0;
-  --white:#FFFFFF;
+  --paper:#FBF2E0;
+  --paper-deep:#F3E2C0;
+  --ink:#33241C;
+  --ink-soft:#7C6552;
+  --coral:#E2503A;
+  --sunflower:#F0AE22;
+  --leaf:#5C9E45;
+  --sky:#3B87C6;
+  --grape:#8759B8;
+  --bubblegum:#DD679B;
+  --white:#FFFDF7;          /* mai bianco puro: è carta, non schermo */
   --card-border:3px solid var(--ink);
-  --card-shadow:0 6px 0 rgba(61,43,36,.22);
+  /* due ombre, non una: lo spessore solido dà il taglio nella carta,
+     la sfocatura sotto stacca il ritaglio dalla pagina */
+  --card-shadow:inset 0 2px 0 rgba(255,253,247,.42), 0 6px 0 rgba(51,36,28,.20), 0 10px 18px -6px rgba(51,36,28,.28);
+  --card-shadow-low:inset 0 2px 0 rgba(255,253,247,.42), 0 2px 0 rgba(51,36,28,.20), 0 4px 8px -3px rgba(51,36,28,.24);
   --radius-big:28px;
   --radius-mid:20px;
   --font-round:'Fredoka','Baloo 2','Arial Rounded MT Bold','Chalkboard SE','Comic Sans MS','Marker Felt',sans-serif;
@@ -30,15 +50,30 @@ body{
   touch-action:manipulation;
   -webkit-user-select:none;user-select:none;
 }
-/* sfondo: pois giganti tenui, stile carta da gioco */
+/* Atmosfera: --amb è il colore del cielo della regione in cui si trova
+   il viaggio (impostato da renderMap). La pagina cambia luce man mano
+   che si attraversa la Francia, invece di restare sempre uguale.
+   Sotto, i pois tenui della carta da gioco. */
 body::before{
   content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:
-    radial-gradient(circle at 12% 18%, rgba(255,197,61,.16) 0 90px, transparent 91px),
-    radial-gradient(circle at 85% 12%, rgba(79,168,232,.13) 0 70px, transparent 71px),
-    radial-gradient(circle at 90% 78%, rgba(242,114,176,.12) 0 110px, transparent 111px),
-    radial-gradient(circle at 8% 85%, rgba(92,184,92,.13) 0 80px, transparent 81px),
-    radial-gradient(circle at 50% 50%, rgba(155,107,212,.07) 0 140px, transparent 141px);
+    radial-gradient(130% 70% at 50% -12%, var(--amb,#FFE6B4) 0%, transparent 62%),
+    radial-gradient(circle at 12% 18%, rgba(240,174,34,.13) 0 90px, transparent 91px),
+    radial-gradient(circle at 85% 12%, rgba(59,135,198,.11) 0 70px, transparent 71px),
+    radial-gradient(circle at 90% 78%, rgba(221,103,155,.10) 0 110px, transparent 111px),
+    radial-gradient(circle at 8% 85%, rgba(92,158,69,.11) 0 80px, transparent 81px);
+  transition:background-image .8s ease;
+}
+/* Grana della carta + vignettatura ai bordi: è ciò che separa una
+   pagina stampata da un fondo piatto. Tassello di 160px ripetuto,
+   quindi il costo è una texture minuscola, non un filtro a schermo intero. */
+body::after{
+  content:"";position:fixed;inset:0;z-index:2;pointer-events:none;
+  opacity:.30;mix-blend-mode:multiply;
+  background-image:
+    radial-gradient(125% 100% at 50% 45%, transparent 70%, rgba(51,36,28,.11) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");
+  background-size:100% 100%, 160px 160px;
 }
 #app{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:14px;min-height:100%}
 
@@ -55,11 +90,11 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
   font-size:1.15rem;font-weight:700;padding:12px 22px;
   transition:transform .12s cubic-bezier(.34,1.56,.64,1), box-shadow .12s;
 }
-.btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(61,43,36,.22)}
+.btn:active{transform:translateY(4px);box-shadow:var(--card-shadow-low)}
 .btn.primary{background:var(--coral);color:#fff}
 .btn.sun{background:var(--sunflower)}
 .btn.round{width:58px;height:58px;padding:0;border-radius:50%;font-size:1.6rem}
-.btn.small{font-size:1rem;padding:8px 16px;box-shadow:0 4px 0 rgba(61,43,36,.22)}
+.btn.small{font-size:1rem;padding:8px 16px;box-shadow:0 4px 0 rgba(51,36,28,.20),0 7px 12px -5px rgba(51,36,28,.26)}
 
 /* ---------- header ---------- */
 .topbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
@@ -73,7 +108,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 
 /* ---------- mascotte + fumetto ---------- */
 .mascot-row{display:flex;align-items:flex-end;gap:12px;margin:6px 0 20px}
-.mascot{font-size:3.4rem;line-height:1;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18));animation:idleBob 3s ease-in-out infinite;transform-origin:bottom center}
+.mascot{font-size:3.4rem;line-height:1;filter:drop-shadow(0 4px 0 rgba(51,36,28,.18));animation:idleBob 3s ease-in-out infinite;transform-origin:bottom center}
 /* filter:none oltre ad animation:none: .mascot-svg (sezione MASCOTTE SVG)
    ha già la sua ombra. Senza azzerare anche quella qui, il contenitore
    applica la SUA ombra al risultato già ombreggiato dell'SVG dentro —
@@ -162,7 +197,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .game-card .gsub{color:var(--ink-soft);font-size:.9rem;font-weight:600}
 .game-card .gstars{margin-top:8px;font-size:1.15rem;letter-spacing:3px;color:#E8A400}
 .unit-hero{text-align:center;margin:6px 0 4px}
-.unit-hero .uemoji{font-size:4rem;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18))}
+.unit-hero .uemoji{font-size:4rem;filter:drop-shadow(0 4px 0 rgba(51,36,28,.18))}
 .unit-hero h2{font-size:2rem}
 .unit-hero .uit{color:var(--ink-soft);font-weight:600}
 
@@ -181,7 +216,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 @keyframes pulseGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 .prompt-zone .hint{margin-top:10px;font-weight:700;font-size:1.3rem}
 .prompt-zone .hint .fr-word{color:var(--coral);font-size:1.5rem}
-.prompt-emoji{font-size:5rem;line-height:1.15;filter:drop-shadow(0 4px 0 rgba(61,43,36,.15))}
+.prompt-emoji{font-size:5rem;line-height:1.15;filter:drop-shadow(0 4px 0 rgba(51,36,28,.15))}
 
 .card-grid{display:grid;gap:14px;grid-template-columns:repeat(2,1fr)}
 @media(min-width:600px){.card-grid.g4{grid-template-columns:repeat(4,1fr)}.card-grid.g3{grid-template-columns:repeat(3,1fr)}}
@@ -219,7 +254,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .mem-card.flip .mem-inner{transform:rotateY(180deg)}
 .mem-face{
   position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  border:var(--card-border);border-radius:var(--radius-mid);box-shadow:0 4px 0 rgba(61,43,36,.2);
+  border:var(--card-border);border-radius:var(--radius-mid);box-shadow:0 4px 0 rgba(51,36,28,.20),0 7px 12px -5px rgba(51,36,28,.26);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
 }
 .mem-front{background:var(--sky);color:#fff;font-size:2rem}
@@ -235,7 +270,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .spell-slot{width:44px;height:56px;border-bottom:4px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:700}
 .spell-slot.filled{animation:winBounce .4s}
 .spell-tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
-.spell-tile{width:56px;height:56px;background:var(--white);border:var(--card-border);border-radius:14px;box-shadow:0 4px 0 rgba(61,43,36,.22);font-size:1.7rem;font-weight:700;transition:transform .12s}
+.spell-tile{width:56px;height:56px;background:var(--white);border:var(--card-border);border-radius:14px;box-shadow:0 4px 0 rgba(51,36,28,.20),0 7px 12px -5px rgba(51,36,28,.26);font-size:1.7rem;font-weight:700;transition:transform .12s}
 .spell-tile:active{transform:scale(.9)}
 .spell-tile.used{visibility:hidden}
 .spell-tile.wrong{animation:shakeNo .45s;background:#FFD9D3}
@@ -295,7 +330,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
   position:fixed;z-index:0;pointer-events:none;opacity:.8;
   animation:drift linear infinite;
 }
-.cloud i{position:absolute;background:#fff;border-radius:50%;box-shadow:0 3px 0 rgba(61,43,36,.06)}
+.cloud i{position:absolute;background:#fff;border-radius:50%;box-shadow:0 3px 0 rgba(51,36,28,.06)}
 .cloud .c1{width:70px;height:44px;left:0;top:12px}
 .cloud .c2{width:52px;height:40px;left:38px;top:0}
 .cloud .c3{width:60px;height:36px;left:70px;top:14px}
@@ -311,7 +346,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 /* volpe nei giochi */
 .game-fox{
   position:fixed;left:10px;bottom:8px;font-size:3rem;line-height:1;z-index:5;
-  pointer-events:none;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18));
+  pointer-events:none;filter:drop-shadow(0 4px 0 rgba(51,36,28,.18));
   transform-origin:bottom center;animation:idleBob 3s ease-in-out infinite;
 }
 /* con l'SVG dentro, il contenitore non deve più animarsi né ombreggiare da
@@ -368,7 +403,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 }
 
 /* ============ MASCOTTE SVG ============ */
-.mascot-svg{display:block;overflow:visible;filter:drop-shadow(0 4px 0 rgba(61,43,36,.18))}
+.mascot-svg{display:block;overflow:visible;filter:drop-shadow(0 4px 0 rgba(51,36,28,.18))}
 .mascot-svg .fox-tail{transform-origin:20px 84px;animation:tailWag 2.4s ease-in-out infinite}
 .mascot-svg .fox-head{transform-origin:50px 60px}
 @keyframes tailWag{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(10deg)}}
@@ -403,10 +438,10 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 
 /* ============ CUTSCENE ============ */
 .cut-stage{position:relative;height:44vh;min-height:240px;border-radius:26px;overflow:hidden;
-  border:4px solid var(--ink);box-shadow:0 8px 0 rgba(61,43,36,.18);cursor:pointer}
+  border:4px solid var(--ink);box-shadow:0 8px 0 rgba(51,36,28,.18),0 16px 26px -10px rgba(51,36,28,.32);cursor:pointer}
 .cut-sky{position:absolute;inset:0}
 .cut-ground{position:absolute;left:0;right:0;bottom:0;height:34%;
-  border-top:4px solid rgba(61,43,36,.14);animation:groundPan 18s linear infinite}
+  border-top:4px solid rgba(51,36,28,.14);animation:groundPan 18s linear infinite}
 @keyframes groundPan{from{background-position:0 0}to{background-position:200px 0}}
 .cut-actor{position:absolute;bottom:12%}
 .cut-actor.fox{left:12%;animation:foxWalkIn .6s cubic-bezier(.2,1.3,.4,1)}
@@ -429,10 +464,10 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .path{max-width:520px;margin:0 auto;padding-bottom:40px;position:relative}
 .region-block{position:relative;padding:4px 0 18px;border-radius:28px;margin-bottom:8px}
 .region-block::before{content:"";position:absolute;left:50%;top:0;bottom:18px;width:14px;margin-left:-7px;
-  background:repeating-linear-gradient(180deg,rgba(61,43,36,.14) 0 18px,transparent 18px 34px);border-radius:8px;z-index:0}
+  background:repeating-linear-gradient(180deg,rgba(51,36,28,.14) 0 18px,transparent 18px 34px);border-radius:8px;z-index:0}
 .region-sign{position:relative;z-index:1;margin:26px auto 18px;padding:10px 22px;border-radius:18px;
   border:4px solid var(--ink);color:#fff;text-align:center;max-width:320px;
-  box-shadow:0 6px 0 rgba(61,43,36,.2);animation:screenIn .4s both;animation-delay:var(--d,0ms)}
+  box-shadow:var(--card-shadow);animation:screenIn .4s both;animation-delay:var(--d,0ms)}
 .region-sign .rfr{font-weight:800;font-size:1.3rem;text-shadow:0 2px 0 rgba(0,0,0,.2)}
 .region-sign .rit{font-size:.9rem;font-weight:600;opacity:.95}
 /* regione appena raggiunta: il cartello "atterra" con un piccolo rimbalzo */
@@ -441,7 +476,7 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .node{position:relative;z-index:1;display:block;width:170px;min-height:44px;margin:0 auto 22px;
   transform:translateX(var(--x,0));background:var(--paper-deep);border:4px solid var(--ink);
   border-radius:24px;padding:12px 10px;text-align:center;cursor:pointer;
-  box-shadow:0 6px 0 rgba(61,43,36,.2);animation:nodeIn .4s backwards;animation-delay:var(--d,0ms)}
+  box-shadow:var(--card-shadow);animation:nodeIn .4s backwards;animation-delay:var(--d,0ms)}
 /* l'ingresso porta con sé l'offset --x invece di scriverci sopra: "backwards" (non "both")
    lascia che a fine animazione torni a valere il transform in cascata qui sopra, così lo
    zig-zag resta e :active sotto non viene silenziato dal keyframe finale */
@@ -457,8 +492,8 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .node.gold{background:linear-gradient(160deg,#FFD75E,#FFB020);border-color:#8A5A00}
 .node.future{opacity:.45;filter:grayscale(.7);cursor:default;box-shadow:none}
 .node.current{animation:nodePulse 1.6s ease-in-out infinite}
-@keyframes nodePulse{0%,100%{box-shadow:0 6px 0 rgba(61,43,36,.2)}
-  50%{box-shadow:0 6px 0 rgba(61,43,36,.2),0 0 0 12px rgba(255,197,61,.35)}}
+@keyframes nodePulse{0%,100%{box-shadow:var(--card-shadow)}
+  50%{box-shadow:var(--card-shadow),0 0 0 12px rgba(240,174,34,.42)}}
 .node-fox{position:absolute;top:-58px;left:50%;transform:translateX(-50%)}
 @media (prefers-reduced-motion: reduce){ .node.current{animation:none} }
 
@@ -498,3 +533,131 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
   padding:14px 18px;margin:14px auto;max-width:460px;font-weight:700;
   animation:bubblePop .4s cubic-bezier(.2,1.5,.4,1)}
 .chapter-prize .prize-emoji .aemoji{width:64px;height:64px}
+
+/* ============================================================
+   V3 — carta stampata: peso tipografico, tatto, controlli
+   ============================================================ */
+
+/* Fredoka arriva fino a 600: prima ogni "700" veniva ingrassato
+   in modo sintetico dal browser, con aste sporche sulle parole
+   francesi — quelle che il bambino deve leggere. */
+.app-title,.btn,.chip,.bubble,.form-step,
+.profile-card .pname,.unit-card .ufr,.game-card .gname,
+.word-card .wlabel,.card .cword,.prompt-word,.song-card,.node .node-title{
+  font-weight:600;
+}
+.app-title{
+  font-weight:600;letter-spacing:-.4px;
+  text-shadow:0 2px 0 rgba(255,253,247,.9), 0 3px 0 rgba(51,36,28,.13);
+}
+/* le parole da leggere respirano: tracciatura leggermente aperta
+   e nessuna legatura che confonda chi sta imparando a decifrare */
+.word-card .wlabel,.card .cword,.prompt-word,.song-line,.spell-slot{
+  letter-spacing:.3px;font-variant-ligatures:none;
+}
+.prompt-zone .hint .fr-word{text-shadow:0 2px 0 rgba(255,253,247,.85)}
+
+/* Tatto: premere una carta la fa affondare nella pagina, non solo
+   rimpicciolire. L'ombra scende insieme all'elemento. */
+.profile-card:active,.unit-card:active,.game-card:active,
+.word-card:active,.card:active,.song-card:active,.sticker-slot:active{
+  box-shadow:var(--card-shadow-low);
+}
+.unit-card,.game-card,.word-card,.profile-card,.song-card,.card{
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1),
+             box-shadow .15s ease, opacity .25s, background .25s;
+}
+
+/* ---------- toggle musica ---------- */
+.music-toggle{
+  position:fixed;right:12px;bottom:12px;z-index:6;
+  width:52px;height:52px;border-radius:50%;font-size:1.5rem;
+  background:var(--sunflower);border:var(--card-border);
+  box-shadow:var(--card-shadow);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s, filter .2s;
+}
+.music-toggle:active{transform:translateY(4px);box-shadow:var(--card-shadow-low)}
+/* spenta resta leggibile ma si toglie di mezzo: è un comando per
+   l'adulto, non un premio da inseguire */
+.music-toggle.off{background:var(--paper-deep);filter:grayscale(.5);opacity:.72}
+@media(max-width:420px){ .music-toggle{width:46px;height:46px;font-size:1.3rem} }
+
+/* la volpe dei giochi sta in basso a sinistra: nessuna sovrapposizione,
+   ma su schermi stretti il pulsante non deve coprire le carte finali */
+@media(max-height:560px){ .music-toggle{bottom:8px;right:8px} }
+
+/* ---------- inchiostro adattivo sui fondi colorati ----------
+   .on-light lo mette il codice (isLightBg in app.js) quando il colore
+   del mondo o della regione è troppo luminoso perché il bianco si legga. */
+.unit-card.on-light,.region-sign.on-light{color:var(--ink)}
+.unit-card.on-light .ufr,.region-sign.on-light .rfr{text-shadow:0 2px 0 rgba(255,253,247,.5)}
+.unit-card.on-light .uit,.region-sign.on-light .rit{opacity:.82}
+.unit-card.on-light .uemoji{filter:drop-shadow(0 3px 0 rgba(51,36,28,.22))}
+
+/* Titolo del mondo: tiene il colore del mondo ma con il contorno
+   d'inchiostro del lettering da copertina, altrimenti un giallo o un
+   azzurro chiaro sparivano dentro la carta. */
+.unit-hero h2{
+  color:var(--u-color,var(--ink));
+  text-shadow:
+    -2px 0 var(--ink), 2px 0 var(--ink), 0 -2px var(--ink), 0 2px var(--ink),
+    -1.4px -1.4px var(--ink), 1.4px -1.4px var(--ink),
+    -1.4px 1.4px var(--ink), 1.4px 1.4px var(--ink),
+    0 6px 0 rgba(51,36,28,.16);
+  letter-spacing:.5px;
+}
+
+/* crediti licenza: per l'adulto, non per il bambino — leggibili ma in fondo */
+.credits{
+  text-align:center;color:var(--ink-soft);font-size:.72rem;font-weight:500;
+  max-width:420px;margin:34px auto 6px;line-height:1.5;opacity:.75;
+}
+.credits em{font-style:normal;font-weight:600}
+
+/* ---------- frase francese nelle scenette ----------
+   Cartellino da lavagna: sta sotto il racconto italiano e si accende
+   quando la voce francese la pronuncia. Il francese è grande e in
+   evidenza, la traduzione italiana piccola sotto: chi non legge segue
+   la voce, chi legge impara a riconoscere la frase. */
+.cut-fr{
+  max-width:640px;margin:12px auto 0;padding:12px 20px;text-align:center;
+  background:var(--paper-deep);border:4px solid var(--ink);border-radius:20px;
+  box-shadow:var(--card-shadow);
+  transform:scale(.97);opacity:.72;
+  transition:transform .3s cubic-bezier(.2,1.5,.4,1), opacity .3s, background .3s;
+}
+.cut-fr.now{
+  background:var(--sunflower);opacity:1;transform:scale(1.03);
+}
+.cut-fr-txt{
+  display:block;font-size:1.45rem;font-weight:600;letter-spacing:.3px;
+  text-shadow:0 2px 0 rgba(255,253,247,.6);
+}
+.cut-fr-it{
+  display:block;font-size:.92rem;font-weight:600;color:var(--ink-soft);margin-top:2px;
+}
+.cut-fr.now .cut-fr-it{color:var(--ink);opacity:.78}
+@media(max-width:420px){ .cut-fr-txt{font-size:1.2rem} }
+@media (prefers-reduced-motion: reduce){ .cut-fr,.cut-fr.now{transition:none;transform:none} }
+
+/* ---------- interfaccia bilingue ----------
+   Francese in evidenza, italiano sotto in piccolo: chi legge impara a
+   riconoscere le parole francesi, chi non legge ancora resta guidato
+   dall'italiano e dalle icone. Stessa gerarchia delle carte-parola. */
+.app-sub b, .form-step b{
+  display:block;font-weight:600;font-size:1.15em;color:var(--ink);
+  letter-spacing:.2px;line-height:1.25;
+}
+.app-sub small, .form-step small{
+  display:block;font-weight:600;font-size:.78em;color:var(--ink-soft);
+  margin-top:1px;letter-spacing:0;
+}
+.app-sub:has(small:only-child) small{font-size:1em}
+.game-card .gname{letter-spacing:.2px}
+
+/* istruzioni dei giochi: stessa gerarchia bilingue del resto */
+.bubble b, .hint b{display:block;font-weight:600;line-height:1.2}
+.bubble small, .hint small{
+  display:block;font-size:.74em;font-weight:600;color:var(--ink-soft);margin-top:2px;
+}
