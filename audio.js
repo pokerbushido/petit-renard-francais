@@ -275,6 +275,7 @@ function tone(freq, start, dur, type="sine", vol=0.18){
 }
 const sfx = {
   tap:   () => tone(520, 0, .08, "triangle", .1),
+  pop:   () => { tone(640, 0, .06, "sine", .14); tone(220, .05, .1, "sine", .1); },
   good:  () => { tone(660,0,.12,"triangle"); tone(880,.11,.2,"triangle"); },
   bad:   () => tone(160, 0, .25, "square", .08),
   flip:  () => tone(420, 0, .07, "sine", .1),

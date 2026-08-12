@@ -60,6 +60,7 @@ const HARDCODED = [
   ["fr", "Salut !"],
   ["fr", "Bravo !"], ["fr", "Super !"], ["fr", "Magnifique !"],
   ["fr", "Génial !"], ["fr", "Très bien !"], ["fr", "Parfait !"],
+  ["fr", "Répète après moi !"],       // gioco Répète! (games.js)
   ["it", "Cra cra! Prendi le tue parole, se ci riesci!"],
 ];
 
@@ -167,32 +168,59 @@ function cmdCount(){
   console.log(`  già generate: ${clips.length - missing.length} · da generare: ${missing.length}`);
 }
 
+/* Una clip "corta" è una parola o frase-chiave che il bambino deve
+   imitare: va detta pulita e senza esitazioni. Con stability bassa e
+   style alto multilingual_v2 sui testi cortissimi IMPROVVISA — clip da
+   9 secondi con "eeeeh…" davanti a "la porte". Qui la voce viene
+   inchiodata: stability alta, niente style, un previous_text che dà
+   il contesto di lettura scandita. */
+function isShortFr(phrase){
+  return phrase.lang === "fr" && phrase.text.length <= 48;
+}
 async function synth(phrase){
   const voiceId = VOICE[phrase.lang];
   if(!voiceId) throw new Error(`Nessuna voce configurata per "${phrase.lang}" (TTS_VOICE_${phrase.lang.toUpperCase()})`);
+  const short = isShortFr(phrase);
   const res = await api(`/v1/text-to-speech/${voiceId}?output_format=${FORMAT}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       text: phrase.text,
       model_id: MODEL,
-      voice_settings: {
-        stability: 0.45,          // un po' di varietà: meno piatto
-        similarity_boost: 0.8,
-        style: 0.35,              // calore da lettura ad alta voce
-        use_speaker_boost: true,
-        // le parole singole vanno dette lente, i racconti a ritmo normale
-        speed: phrase.lang === "fr" ? 0.85 : 0.95,
-      },
+      ...(short ? { previous_text: "Écoute bien et répète :" } : {}),
+      voice_settings: short
+        ? {
+            stability: 0.9,           // parola secca, zero improvvisazione
+            similarity_boost: 0.8,
+            style: 0,
+            use_speaker_boost: true,
+            speed: 0.9,               // chiara ma senza trascinare
+          }
+        : {
+            stability: 0.5,
+            similarity_boost: 0.8,
+            style: 0.25,              // calore da lettura ad alta voce
+            use_speaker_boost: true,
+            speed: 0.95,
+          },
     }),
   });
   return Buffer.from(await res.arrayBuffer());
 }
 
-async function cmdGenerate({ force }){
+async function cmdGenerate({ force, redoShortFr }){
   const phrases = collectPhrases();
-  const clips = [...new Map(phrases.map(p => [p.file, p])).values()];   // un file = una sola richiesta
-  const todo = force ? clips : clips.filter(p => !existsSync(join(AUDIO_DIR, p.file)));
+  let clips = [...new Map(phrases.map(p => [p.file, p])).values()];   // un file = una sola richiesta
+  /* TTS_FILTER: regex sul testo, per rigenerare clip mirate senza
+     bruciare crediti su tutto (es. TTS_FILTER='^le chat$' --force) */
+  if(process.env.TTS_FILTER){
+    const re = new RegExp(process.env.TTS_FILTER, "i");
+    clips = clips.filter(p => re.test(p.text));
+  }
+  const todo = clips.filter(p =>
+    force ||
+    (redoShortFr && isShortFr(p)) ||          // sovrascrive in place: mai buchi
+    !existsSync(join(AUDIO_DIR, p.file)));
   console.log(`${todo.length}/${clips.length} clip da generare.`);
 
   for(const lang of new Set(phrases.map(p => p.lang))) mkdirSync(join(AUDIO_DIR, lang), { recursive: true });
@@ -260,4 +288,4 @@ if(arg === "--voices") await cmdVoices();
 else if(arg === "--count") cmdCount();
 else if(arg === "--check") selfCheck();
 else if(arg === "--index") writeIndex(collectPhrases());
-else await cmdGenerate({ force: arg === "--force" });
+else await cmdGenerate({ force: arg === "--force", redoShortFr: arg === "--redo-short-fr" });

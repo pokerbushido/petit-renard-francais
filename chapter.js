@@ -137,6 +137,7 @@ function finishChapter(token){
   setDots(0, []);
   $("gameArea").innerHTML = `
     <div class="win-zone">
+      <div class="sunburst"></div>
       <div class="wmascot has-svg">${foxSvg("saute", {size:140})}</div>
       <h2>${wasDone ? "Encore mieux !" : "Chapitre terminé !"}</h2>
       <div class="chapter-prize">
