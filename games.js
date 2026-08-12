@@ -602,9 +602,23 @@ function roundCatch(unit, word, p, onDone){
    ============================================================ */
 let micStream = null;
 let micUrl = null;
+let micRecorder = null;
+/* Stesso schema-token del chapter runner: ogni uscita dal gioco lo
+   invalida, e i callback asincroni ancora in volo (onstop del recorder,
+   onended del playback, getUserMedia che risolve tardi) se ne accorgono
+   e non toccano più né lo schermo né l'audio. Senza, uscire a metà
+   registrazione faceva riprodurre la voce — con volpe che salta e
+   #gameArea sovrascritto — sopra il gioco successivo. */
+let repeteToken = 0;
 /* chiamata da gameBack/startGame (app.js): spegne il microfono se il
    bambino esce a metà gioco — la lucina rossa non deve restare accesa */
 function stopMicGame(){
+  repeteToken++;
+  if(micRecorder){
+    micRecorder.onstop = micRecorder.ondataavailable = null;
+    try{ if(micRecorder.state !== "inactive") micRecorder.stop(); }catch(e){}
+    micRecorder = null;
+  }
   if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream = null; }
   if(micUrl){ URL.revokeObjectURL(micUrl); micUrl = null; }
 }
@@ -614,9 +628,13 @@ function startRepete(u, p){
   const showText = p.mode === "read";
   const pool = pickRounds(u, p, WORDS);
   const results = [];
-  let i = 0, recorder = null, recTimer = null;
+  let i = 0, recTimer = null;
+  /* startGame ha appena chiamato stopMicGame(), che ha incrementato il
+     token: questo è il valore di QUESTA partita. */
+  const myToken = repeteToken;
 
   function playWord(){
+    if(myToken !== repeteToken) return;
     if(i >= pool.length){
       stopMicGame();
       finishGame("repete", 3, u);   // partecipare È vincere: mai giudizio sulla voce
@@ -650,10 +668,15 @@ function startRepete(u, p){
   function bindMic(w){
     const btn = $("micBtn"), hint = $("repHint");
     let chunks = [];
+    /* il permesso microfono può arrivare DOPO che il dito si è già
+       alzato: senza questo flag la registrazione partirebbe orfana e
+       andrebbe avanti da sola fino al tetto dei 5 secondi */
+    let held = false;
 
     const startRec = async e=>{
       e.preventDefault();
-      if(recorder) return;
+      if(micRecorder) return;
+      held = true;
       stopSpeech();
       try{
         if(!micStream) micStream = await navigator.mediaDevices.getUserMedia({audio:true});
@@ -666,16 +689,24 @@ function startRepete(u, p){
         btn.onclick = ()=>{ sfx.good(); sparkleAt(btn); advance(); };
         return;
       }
+      if(myToken !== repeteToken){
+        /* uscito dal gioco mentre si aspettava il permesso: lo stream
+           appena concesso va spento subito, nessuno lo userà più */
+        if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream = null; }
+        return;
+      }
+      if(!held || micRecorder) return;   // dito già alzato durante l'attesa del permesso
       chunks = [];
-      recorder = new MediaRecorder(micStream);
-      recorder.ondataavailable = ev=>{ if(ev.data.size) chunks.push(ev.data); };
-      recorder.onstop = ()=>{
-        recorder = null;
+      micRecorder = new MediaRecorder(micStream);
+      micRecorder.ondataavailable = ev=>{ if(ev.data.size) chunks.push(ev.data); };
+      micRecorder.onstop = ()=>{
+        micRecorder = null;
+        if(myToken !== repeteToken) return;
         btn.classList.remove("recording");
         if(!chunks.length){ hint.textContent = "Non ho sentito niente… riprova!"; return; }
         playBack(new Blob(chunks, {type: chunks[0].type || "audio/webm"}));
       };
-      recorder.start();
+      micRecorder.start();
       duckMusic(true);
       btn.classList.add("recording");
       hint.textContent = "Ti ascolto… parla!";
@@ -683,9 +714,10 @@ function startRepete(u, p){
       recTimer = setTimeout(stopRec, 5000);
     };
     const stopRec = ()=>{
+      held = false;
       clearTimeout(recTimer);
       duckMusic(false);
-      if(recorder && recorder.state === "recording") recorder.stop();
+      if(micRecorder && micRecorder.state === "recording") micRecorder.stop();
     };
 
     const playBack = blob=>{
@@ -697,6 +729,7 @@ function startRepete(u, p){
       duckMusic(true);
       el.onended = el.onerror = ()=>{
         duckMusic(false);
+        if(myToken !== repeteToken) return;   // partita già abbandonata
         btn.classList.remove("playing");
         sfx.good(); sparkleAt(btn); foxReact("jump");
         setTimeout(advance, 500);
@@ -705,6 +738,7 @@ function startRepete(u, p){
     };
 
     const advance = ()=>{
+      if(myToken !== repeteToken) return;
       results.push("ok");
       i++;
       setDots(WORDS, results);
