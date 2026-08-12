@@ -334,8 +334,16 @@ check("gioca libero mostra le unità dei capitoli sbloccati E quelle già giocat
 });
 
 check("la modalità ascolto esclude i giochi di lettura", () => {
-  assert.deepEqual(Array.from(P.availableGameIds(profile({mode:"listen"}))), ["explore","find","memory"]);
-  assert.equal(P.availableGameIds(profile({mode:"read"})).length, 5);
+  assert.deepEqual(Array.from(P.availableGameIds(profile({mode:"listen"}))), ["explore","find","catch","memory"]);
+  assert.equal(P.availableGameIds(profile({mode:"read"})).length, 6);
+});
+
+check("i giochi freeOnly (microfono) non entrano mai nei capitoli", () => {
+  for (const mode of ["listen", "read"]) {
+    const ids = P.availableGameIds(profile({mode}));
+    assert.ok(!ids.includes("repete"),
+      `"repete" è freeOnly ma compare nei round dei capitoli (mode=${mode})`);
+  }
 });
 
 check("la ri-proposta avviene sempre in un gioco diverso", () => {

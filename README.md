@@ -15,12 +15,16 @@ manca. Il primo suono parte dopo il primo tocco (requisito iOS).
 - **18 mondi tematici** lungo il viaggio: saluti, famiglia, casa, colori, fattoria, animali,
   meteo, numeri, camminare, cibo, trasporti, scuola, mare, montagna, vestiti, corpo, sport,
   festa — 158 parole in tutto, ciascuna con articolo, voce francese ed emoji/colore/numero.
-- **5 mini-giochi per mondo** (i primi 3 in modalità solo ascolto, tutti e 5 in modalità lettura):
-  - 🔍 **Scopri** — tocca le carte e ascolta le parole
-  - 👂 **Trova!** — ascolta la parola e tocca l'immagine giusta
-  - 🃏 **Memory** — trova le coppie (in modalità lettura: figura ↔ parola scritta)
-  - 📖 **Leggi** — abbina la parola scritta all'immagine (solo modalità lettura)
-  - ✏️ **Scrivi** — componi la parola lettera per lettera (solo modalità lettura)
+- **7 mini-giochi per mondo** (i primi 4 + Répète in modalità solo ascolto, tutti in modalità lettura):
+  - 🔍 **Découvre** — tocca le carte e ascolta le parole
+  - 👂 **Trouve!** — ascolta la parola e tocca l'immagine giusta
+  - 🫧 **Attrape!** — bolle che volano: scoppia quella giusta (il gioco "d'azione" alla Studycat)
+  - 🃏 **Mémory** — trova le coppie (in modalità lettura: figura ↔ parola scritta)
+  - 📖 **Lis** — abbina la parola scritta all'immagine (solo modalità lettura)
+  - ✏️ **Écris** — componi la parola lettera per lettera (solo modalità lettura)
+  - 🎤 **Répète!** — ascolta Foxy, registra la tua voce e riascoltala (stile
+    VoicePlay di Studycat; solo gioco libero, mai nei capitoli; senza microfono
+    il gioco sparisce dal menù, col permesso negato ripiega su "ripeti a voce alta")
 - **Profili multipli** (fino a 4): ogni bimbo sceglie avatar e modalità:
   - 👂 *Solo ascolto* — per chi non legge ancora (5 anni)
   - 📖 *Ascolto + lettura* — per chi legge (7 anni)
@@ -57,7 +61,7 @@ Foxy e tre per Pipelette, animate in CSS.
 Nessun build step: tutto `<script>` classici, caricati in ordine di dipendenza
 (così in `index.html`):
 
-- `data.js` — le 18 unità (mondi) e i 5 giochi
+- `data.js` — le 18 unità (mondi) e i 7 giochi
 - `story.js` — le 5 regioni e i 18 capitoli del viaggio (cutscene incluse)
 - `assets-map.js` — mappa emoji → asset Noto scaricati da `tools/fetch_assets.py`
 - `progress.js` — logica pura di progressione (nessun DOM, testata da `tools/check.mjs`)
@@ -65,12 +69,12 @@ Nessun build step: tutto `<script>` classici, caricati in ordine di dipendenza
 - `cutscene.js` — motore delle scenette animate a inizio capitolo
 - `map.js` — la mappa a nodi sequenziale
 - `chapter.js` — il runner dei capitoli (cutscene → micro-round → sfida → ricompensa)
-- `games.js` — i cinque mini-giochi, sia in modalità libera sia come micro-round
+- `games.js` — i sette mini-giochi, sia in modalità libera sia come micro-round
 - `audio.js` — voce (clip registrate + ripiego sulla voce di sistema), musica di
   sottofondo con ducking, effetti WebAudio
 - `app.js` — stato, storage, profili, home, avvio dell'app
 - `style.css` — tutto lo stile e le animazioni (CSS puro, nessuna libreria)
-- `tools/check.mjs` — 42 asserzioni sugli invarianti di dati e progressione
+- `tools/check.mjs` — 43 asserzioni sugli invarianti di dati e progressione
 - `tools/tts.mjs` — genera offline le clip vocali (`--check` per il self-test)
 - `tools/fetch_assets.py` — scarica gli asset emoji Noto usati in `assets-map.js`
 

@@ -118,6 +118,28 @@ function confetti(n = 36, emojis = null){
   }
 }
 
+/* Scintille dal punto della risposta giusta: il premio parte da DOVE il
+   bambino ha toccato, non da un punto qualunque dello schermo. È il
+   feedback "succoso" delle app commerciali, in 8 pallini CSS. */
+function sparkleAt(el){
+  if(!el || !el.getBoundingClientRect) return;
+  const r = el.getBoundingClientRect();
+  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  for(let i=0;i<8;i++){
+    const s = document.createElement("div");
+    s.className = "spark";
+    s.style.left = cx + "px";
+    s.style.top  = cy + "px";
+    s.style.background = CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)];
+    const a = (i/8) * 2 * Math.PI + Math.random()*0.5;
+    const d = 44 + Math.random()*40;
+    s.style.setProperty("--dx", Math.cos(a)*d + "px");
+    s.style.setProperty("--dy", Math.sin(a)*d + "px");
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 700);
+  }
+}
+
 /* ============================================================
    HELPERS UI
    ============================================================ */
@@ -313,8 +335,15 @@ $("homeStickers").onclick = ()=>{ sfx.tap(); renderStickers(); };
    UNITÀ
    ============================================================ */
 let currentUnit = null;
+/* il gioco del microfono compare solo dove può funzionare: senza
+   MediaRecorder (o su http non sicuro) sparisce dal menù invece di
+   aprire una schermata che chiede un permesso destinato a fallire */
+const MIC_SUPPORTED = !!(navigator.mediaDevices &&
+  navigator.mediaDevices.getUserMedia && window.MediaRecorder);
 function availableGames(p){
-  return GAMES.filter(g => !g.readerOnly || p.mode === "read");
+  return GAMES
+    .filter(g => !g.readerOnly || p.mode === "read")
+    .filter(g => g.id !== "repete" || MIC_SUPPORTED);
 }
 function openUnit(unitId){
   const p = activeProfile(); if(!p) return renderProfiles();
@@ -353,6 +382,7 @@ let game = null; // stato del gioco corrente
 $("gameBack").onclick = ()=>{
   sfx.tap();
   stopSpeech();
+  stopMicGame();
   if(chapterRunning()){ abortChapter(); renderMap(); return; }
   /* sulla schermata di ricompensa del capitolo chapterRunning() è già
      false: openChapter (chapter.js) azzera currentUnit all'inizio del
@@ -369,11 +399,14 @@ $("gameRepeat").onclick = ()=>{
 function startGame(gameId){
   const p = activeProfile();
   const u = currentUnit;
+  stopMicGame();   // cambio gioco a metà Répète: il microfono va spento
   if(gameId === "explore") startExplore(u);
   else if(gameId === "find") startFind(u, p);
+  else if(gameId === "catch") startCatch(u, p);
   else if(gameId === "memory") startMemory(u, p);
   else if(gameId === "read") startRead(u);
   else if(gameId === "spell") startSpell(u);
+  else if(gameId === "repete") startRepete(u, p);
   show("screen-game");
 }
 function setDots(total, doneArr){
@@ -404,6 +437,7 @@ function finishGame(gameId, stars, u){
   setDots(0, []);
   area.innerHTML = `
     <div class="win-zone">
+      <div class="sunburst"></div>
       <div class="wmascot has-svg">${foxSvg("saute", {size:130})}</div>
       <h2>${praise}</h2>
       <div class="wstars">${[0,1,2].map(i=>`<span data-i="${i}">${i<stars?"⭐":"☆"}</span>`).join("")}</div>

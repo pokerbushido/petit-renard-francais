@@ -275,6 +275,68 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .spell-tile.used{visibility:hidden}
 .spell-tile.wrong{animation:shakeNo .45s;background:#FFD9D3}
 
+/* ---------- Attrape! (bolle) ----------
+   Il cielo è un ritaglio con orizzonte: le bolle nascono sotto il
+   bordo e salgono in loop. Ogni bolla porta il suo visual dentro
+   una "pelle" di sapone con riflesso. */
+.catch-sky{
+  position:relative;height:min(52vh,430px);overflow:hidden;
+  border:var(--card-border);border-radius:var(--radius-big);
+  box-shadow:var(--card-shadow);
+  background:linear-gradient(180deg,#CFEBFA 0%, #E8F6FD 62%, #F4EFD8 100%);
+}
+.catch-prompt{margin-bottom:12px}
+.bubble-item{
+  position:absolute;bottom:-130px;left:var(--lane,10%);
+  width:96px;height:96px;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  animation:floatUp var(--dur,7s) linear var(--delay,0s) infinite;
+}
+.bubble-item .bubble-skin{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.9) 0 12%, rgba(255,255,255,.25) 30%, rgba(160,215,255,.35) 100%);
+  border:3px solid rgba(51,36,28,.55);
+  box-shadow:inset -6px -8px 14px rgba(59,135,198,.25);
+}
+.bubble-item .bemoji{font-size:2.6rem;line-height:1;position:relative}
+.bubble-item .wswatch,.bubble-item .mswatch{width:44px;height:44px;border-radius:50%;border:var(--card-border);position:relative}
+.bubble-item .wdigit,.bubble-item .mword{font-size:2.2rem;font-weight:700;position:relative}
+/* corsa fissa da 700px: copre il contenitore più alto possibile
+   (430px) più bolla e margini; sui contenitori bassi la bolla passa
+   parte del giro sopra il bordo, nascosta dall'overflow — va bene */
+@keyframes floatUp{
+  from{transform:translateY(0) rotate(-3deg)}
+  50%{transform:translateY(-350px) rotate(3deg)}
+  to{transform:translateY(-700px) rotate(-3deg)}
+}
+.bubble-item.popped{animation:bubblePopOut .5s cubic-bezier(.2,1.4,.4,1) forwards}
+.bubble-item.popped .bubble-skin{background:radial-gradient(circle,#FFE9A8 0 40%,transparent 70%);border-color:var(--sunflower)}
+@keyframes bubblePopOut{
+  40%{transform:scale(1.35);opacity:1}
+  to{transform:scale(1.7);opacity:0}
+}
+.bubble-item.bubble-no{filter:grayscale(.4)}
+.bubble-item.bubble-no .bubble-skin{animation:shakeNo .45s;background:radial-gradient(circle at 32% 28%, #FFD9D3 0 30%, rgba(255,217,211,.4) 100%)}
+@media(max-width:420px){ .bubble-item{width:80px;height:80px} .bubble-item .bemoji{font-size:2.1rem} }
+
+/* ---------- Répète! (microfono) ---------- */
+.repete-controls{display:flex;gap:18px;align-items:center;justify-content:center;margin-top:20px}
+.mic-btn{
+  width:96px;height:96px;border-radius:50%;font-size:2.6rem;
+  background:var(--coral);border:var(--card-border);box-shadow:var(--card-shadow);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s, background .2s;
+  touch-action:none; /* press-and-hold: il browser non deve scrollare o zoomare */
+}
+.mic-btn:active{transform:scale(.92);box-shadow:var(--card-shadow-low)}
+.mic-btn.recording{background:#D5382B;animation:micPulse .9s ease-in-out infinite}
+@keyframes micPulse{
+  0%,100%{box-shadow:var(--card-shadow),0 0 0 0 rgba(226,80,58,.5)}
+  50%{box-shadow:var(--card-shadow),0 0 0 18px rgba(226,80,58,0)}
+}
+.mic-btn.playing{background:var(--leaf);animation:pulseGlow 1s ease-in-out infinite}
+.repete-hint{text-align:center;font-weight:600;color:var(--ink-soft);margin-top:12px;font-size:1.05rem}
+.repete-card{min-height:150px}
+
 /* ---------- schermata vittoria ---------- */
 .win-zone{text-align:center;padding:30px 10px}
 .win-zone .wmascot{font-size:5rem;display:inline-block;animation:winDance .8s cubic-bezier(.34,1.56,.64,1) infinite alternate}
@@ -310,6 +372,36 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .confetto{position:fixed;top:-20px;z-index:99;pointer-events:none;font-size:1.4rem;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 .confetto.shape{width:12px;height:12px;border-radius:3px;font-size:0}
+
+/* ---------- scintille (sparkleAt) ----------
+   Otto pallini che esplodono dal punto toccato: il premio parte da
+   dove il bambino ha messo il dito, non dal centro dello schermo. */
+.spark{
+  position:fixed;width:10px;height:10px;border-radius:50%;
+  z-index:98;pointer-events:none;margin:-5px 0 0 -5px;
+  animation:sparkFly .6s cubic-bezier(.2,.7,.4,1) forwards;
+}
+@keyframes sparkFly{
+  from{opacity:1;transform:translate(0,0) scale(1.1)}
+  to{opacity:0;transform:translate(var(--dx,0),var(--dy,0)) scale(0)}
+}
+
+/* ---------- sunburst di vittoria ----------
+   Raggi di sole che girano piano dietro Foxy sulla schermata dei
+   premi: il momento di gloria delle app commerciali, in un solo div. */
+.win-zone{position:relative;overflow:hidden}
+/* i raggi sono un elemento posizionato: senza questo, coprirebbero i
+   fratelli statici (volpe, stelle, bottoni) invece di stargli dietro */
+.win-zone > *:not(.sunburst){position:relative;z-index:1}
+.sunburst{
+  position:absolute;left:50%;top:86px;width:360px;height:360px;
+  margin:-180px 0 0 -180px;border-radius:50%;pointer-events:none;
+  background:repeating-conic-gradient(rgba(240,174,34,.20) 0 14deg, transparent 14deg 28deg);
+  -webkit-mask-image:radial-gradient(circle,#000 26%,transparent 66%);
+  mask-image:radial-gradient(circle,#000 26%,transparent 66%);
+  animation:sunSpin 16s linear infinite;
+}
+@keyframes sunSpin{to{transform:rotate(360deg)}}
 
 /* ---------- responsive piccoli ---------- */
 @media(max-width:420px){
@@ -448,8 +540,20 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .cut-actor.pie{right:10%;bottom:56%;animation:pieFlyIn .8s ease-out}
 @keyframes foxWalkIn{from{transform:translateX(-60px);opacity:0}to{transform:none;opacity:1}}
 @keyframes pieFlyIn{from{transform:translate(70px,-40px) rotate(12deg);opacity:0}to{transform:none;opacity:1}}
-.cut-prop{position:absolute;right:22%;bottom:16%;font-size:2.6rem}
+.cut-prop{position:absolute;right:22%;bottom:16%;font-size:2.6rem;animation:propBob 3.2s ease-in-out infinite}
 .cut-prop .aemoji{width:64px;height:64px}
+@keyframes propBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+/* nuvole dentro la scena: iniettate da playCutscene, derivano da sinistra
+   a destra dentro il ritaglio del palco (overflow:hidden le taglia) */
+.cut-cloud{
+  position:absolute;top:var(--ct,15%);left:-140px;width:96px;height:34px;
+  background:#fff;border-radius:22px;opacity:.75;pointer-events:none;
+  transform:scale(var(--cs,1));
+  animation:cutDrift var(--cd,36s) linear infinite;
+}
+.cut-cloud::before{content:"";position:absolute;left:16px;top:-16px;width:44px;height:34px;background:#fff;border-radius:50%}
+.cut-cloud::after{content:"";position:absolute;right:14px;top:-10px;width:36px;height:28px;background:#fff;border-radius:50%}
+@keyframes cutDrift{to{transform:scale(var(--cs,1)) translateX(1100px)}}
 .cut-bubble{background:#fff;border:4px solid var(--ink);border-radius:22px;padding:16px 20px;
   margin:16px auto 0;max-width:640px;font-weight:700;font-size:1.2rem;line-height:1.45;min-height:76px}
 .cut-bubble.pop{animation:bubblePop .32s cubic-bezier(.2,1.5,.4,1)}
@@ -457,7 +561,10 @@ button{font-family:inherit;color:inherit;border:none;background:none;cursor:poin
 .cut-actions{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:14px}
 #cutSkip{min-height:44px} /* .btn.small misura 43px: sotto la soglia tap-target iPad, corretto qui */
 @media (prefers-reduced-motion: reduce){
-  .cut-ground,.cut-actor,.cut-bubble.pop{animation:none}
+  .cut-ground,.cut-actor,.cut-bubble.pop,.cut-cloud,.cut-prop{animation:none}
+  .sunburst{animation:none}
+  .spark{display:none}
+  .bubble-item{animation-duration:calc(var(--dur,7s) * 2)} /* più lente, mai ferme: da ferme il gioco non esiste */
 }
 
 /* ============ MAPPA ============ */

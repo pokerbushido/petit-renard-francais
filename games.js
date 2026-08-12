@@ -82,6 +82,7 @@ function startFind(u, p){
           c.classList.add("correct");
           c.innerHTML += `<div class="wlabel" style="color:#fff">${w.fr}</div>`;
           sfx.good();
+          sparkleAt(c);
           foxReact("jump");
           speak(target.fr, {rate:0.85});
           results.push(roundError ? "bad" : "ok");
@@ -150,6 +151,7 @@ function startMemory(u, p){
         setTimeout(()=>{
           a.classList.add("matched"); b.classList.add("matched");
           sfx.good();
+          sparkleAt(b);
           first = null; locked = false;
           if(matched === PAIRS){
             const stars = misses <= 2 ? 3 : misses <= 5 ? 2 : 1;
@@ -207,6 +209,7 @@ function startRead(u){
           locked = true;
           c.classList.add("correct");
           sfx.good();
+          sparkleAt(c);
           speak(target.fr);
           results.push(roundError ? "bad" : "ok");
           if(roundError) errorsTotal++; else bumpMiss(u, target, -1);
@@ -276,6 +279,7 @@ function startSpell(u){
           pos++;
           if(pos === letters.length){
             sfx.good();
+            sparkleAt($("spellSlots"));
             speak(target.fr);
             results.push(roundError ? "bad" : "ok");
             if(roundError) errorsTotal++;
@@ -302,6 +306,7 @@ function startSpell(u){
 function playRound(gameId, unit, word, onDone){
   const p = activeProfile();
   if(gameId === "find")        return roundFind(unit, word, p, onDone);
+  if(gameId === "catch")       return roundCatch(unit, word, p, onDone);
   if(gameId === "read")        return roundRead(unit, word, onDone);
   if(gameId === "spell")       return roundSpell(unit, word, onDone);
   if(gameId === "memory")      return roundMemory(unit, word, p, onDone);
@@ -343,6 +348,7 @@ function roundExplore(unit, word, onDone){
     if(clicked) return;
     clicked = true;
     $("rcard").classList.add("done");
+    sparkleAt($("rcard"));
     bumpMiss(unit, word, -1);
     setTimeout(()=> onDone(0), 1200);
   };
@@ -368,7 +374,7 @@ function roundFind(unit, word, p, onDone){
       if(locked) return;
       if(w === word){
         locked = true;
-        sfx.good(); foxReact("jump"); speak(word.fr);
+        sfx.good(); sparkleAt(b); foxReact("jump"); speak(word.fr);
         b.classList.add("ok");
         bumpMiss(unit, word, -1);
         setTimeout(()=> onDone(errori), 1100);
@@ -404,7 +410,7 @@ function roundRead(unit, word, onDone){
       if(locked) return;
       if(w === word){
         locked = true;
-        sfx.good(); foxReact("jump"); speak(word.fr);
+        sfx.good(); sparkleAt(b); foxReact("jump"); speak(word.fr);
         b.classList.add("ok");
         bumpMiss(unit, word, -1);
         setTimeout(()=> onDone(errori), 1100);
@@ -452,7 +458,7 @@ function roundSpell(unit, word, onDone){
         b.classList.add("used");
         pos++;
         if(pos === lettere.length){
-          sfx.good(); foxReact("jump"); speak(word.fr);
+          sfx.good(); sparkleAt(b); foxReact("jump"); speak(word.fr);
           bumpMiss(unit, word, -1);
           setTimeout(()=> onDone(errori), 1300);
         }
@@ -465,6 +471,252 @@ function roundSpell(unit, word, onDone){
   });
   /* v. commento in roundExplore: tracciato per poter essere cancellato da abortChapter() */
   roundTimer = setTimeout(()=> speak(word.fr), 400);
+}
+
+/* ============================================================
+   ATTRAPE ! — bolle che salgono, si scoppia quella giusta.
+   Il gioco "d'azione" alla Studycat: le carte volano invece di
+   stare ferme. Le bolle sbagliate non si fermano mai: scoppiare
+   quella giusta è l'unico modo di chiudere il round.
+   ============================================================ */
+
+/* Le bolle nascono sotto il bordo e salgono in loop (delay negativo =
+   già in volo). Alla presa giusta la bolla viene congelata dov'è
+   (l'animazione CSS va rimossa PRIMA di leggere la posizione, sennò
+   il pop riparte dal fondo) e scoppia sul posto. */
+function spawnBubbles(sky, options, onTap){
+  options.forEach((w, i)=>{
+    const b = document.createElement("button");
+    b.className = "bubble-item";
+    const lane = 4 + i * (86 / options.length) + Math.random() * 8;
+    b.style.setProperty("--lane", lane + "%");
+    b.style.setProperty("--dur", (6 + Math.random() * 3).toFixed(2) + "s");
+    b.style.setProperty("--delay", (-Math.random() * 5).toFixed(2) + "s");
+    b.innerHTML = `<span class="bubble-skin"></span>${wordVisual(w, "bemoji")}`;
+    b.onclick = ()=> onTap(w, b);
+    sky.appendChild(b);
+  });
+}
+function popBubble(b, sky){
+  const r = b.getBoundingClientRect(), s = sky.getBoundingClientRect();
+  b.style.animation = "none";
+  b.style.bottom = "auto";
+  b.style.top  = (r.top - s.top) + "px";
+  b.style.left = (r.left - s.left) + "px";
+  b.classList.add("popped");
+}
+
+function startCatch(u, p){
+  const ROUNDS = 6;
+  const showText = p.mode === "read";
+  const seq = pickRounds(u, p, ROUNDS);
+  const results = [];
+  let round = 0, errorsTotal = 0;
+
+  function playRoundC(){
+    if(round >= seq.length){
+      const stars = errorsTotal === 0 ? 3 : errorsTotal <= 2 ? 2 : 1;
+      finishGame("catch", stars, u);
+      return;
+    }
+    const target = seq[round];
+    const others = shuffle(u.words.filter(w=>w!==target)).slice(0,3);
+    const options = shuffle([target, ...others]);
+    let roundError = false, locked = false;
+
+    setDots(ROUNDS, results);
+    const area = $("gameArea");
+    area.innerHTML = `
+      <div class="prompt-zone catch-prompt">
+        <button class="big-audio" id="bigAudio">🔊</button>
+        <div class="hint">${showText ? `<span class="fr-word">${target.fr}</span>` : "<b>Attrape !</b><small>Scoppia la bolla giusta</small>"}</div>
+      </div>
+      <div class="catch-sky" id="catchSky"></div>
+      <div class="game-fox has-svg" id="gameFox">${foxSvg("montre", {size:56})}</div>`;
+    $("bigAudio").onclick = ()=>speak(target.fr);
+    const sky = $("catchSky");
+    spawnBubbles(sky, options, (w, b)=>{
+      if(locked) return;
+      if(w === target){
+        locked = true;
+        popBubble(b, sky);
+        sfx.pop(); sfx.good();
+        sparkleAt(b);
+        foxReact("jump");
+        speak(target.fr, {rate:0.85});
+        results.push(roundError ? "bad" : "ok");
+        if(roundError) errorsTotal++; else bumpMiss(u, target, -1);
+        setDots(ROUNDS, results);
+        round++;
+        setTimeout(playRoundC, 1300);
+      }else{
+        if(!roundError) bumpMiss(u, target, +1);
+        roundError = true;
+        sfx.bad();
+        foxReact("wobble");
+        b.classList.remove("bubble-no"); void b.offsetWidth; b.classList.add("bubble-no");
+        speak(target.fr);
+      }
+    });
+    setTimeout(()=>speak(target.fr), 450);
+  }
+  playRoundC();
+}
+
+/* micro-round del runner: una parola, quattro bolle */
+function roundCatch(unit, word, p, onDone){
+  const distrattori = shuffle(unit.words.filter(w => w !== word)).slice(0, 3);
+  const scelte = shuffle([word, ...distrattori]);
+  let errori = 0, locked = false;
+  const area = $("gameArea");
+  area.innerHTML = roundHead("montre", "<b>Attrape !</b><small>Scoppia la bolla giusta</small>") +
+    `<div class="catch-sky" id="rsky"></div>`;
+  const sky = $("rsky");
+  spawnBubbles(sky, scelte, (w, b)=>{
+    if(locked) return;
+    if(w === word){
+      locked = true;
+      popBubble(b, sky);
+      sfx.pop(); sfx.good();
+      sparkleAt(b);
+      foxReact("jump");
+      speak(word.fr);
+      bumpMiss(unit, word, -1);
+      setTimeout(()=> onDone(errori), 1100);
+    }else{
+      errori++;
+      roundMiss(unit, word);
+      b.classList.remove("bubble-no"); void b.offsetWidth; b.classList.add("bubble-no");
+      speak(word.fr);
+    }
+  });
+  /* v. commento in roundExplore: tracciato per poter essere cancellato da abortChapter() */
+  roundTimer = setTimeout(()=> speak(word.fr), 500);
+}
+
+/* ============================================================
+   RÉPÈTE ! — ascolta Foxy, registra la tua voce, riascoltala.
+   È il VoicePlay di Studycat in versione onesta: nessun giudizio
+   sulla pronuncia, la magia è sentire la PROPRIA voce dire la
+   parola. Non si può sbagliare: 3 stelle a chi arriva in fondo.
+   ============================================================ */
+let micStream = null;
+let micUrl = null;
+/* chiamata da gameBack/startGame (app.js): spegne il microfono se il
+   bambino esce a metà gioco — la lucina rossa non deve restare accesa */
+function stopMicGame(){
+  if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream = null; }
+  if(micUrl){ URL.revokeObjectURL(micUrl); micUrl = null; }
+}
+
+function startRepete(u, p){
+  const WORDS = 5;
+  const showText = p.mode === "read";
+  const pool = pickRounds(u, p, WORDS);
+  const results = [];
+  let i = 0, recorder = null, recTimer = null;
+
+  function playWord(){
+    if(i >= pool.length){
+      stopMicGame();
+      finishGame("repete", 3, u);   // partecipare È vincere: mai giudizio sulla voce
+      return;
+    }
+    const w = pool[i];
+    setDots(WORDS, results);
+    const area = $("gameArea");
+    area.innerHTML = roundHead("parle", "<b>Répète après moi !</b><small>Ascolta, poi tieni premuto il microfono e ripeti</small>") +
+      `<div class="card-grid g1"><div class="card repete-card">
+         ${wordVisual(w)}
+         ${showText ? `<div class="cword">${escapeHtml(w.fr)}</div>` : ""}
+       </div></div>
+       <div class="repete-controls">
+         <button class="btn round sun" id="repHear" title="Riascolta">🔊</button>
+         <button class="mic-btn" id="micBtn">🎤</button>
+       </div>
+       <p class="repete-hint" id="repHint">Tieni premuto e parla!</p>`;
+    $("repHear").onclick = ()=>speak(w.fr, {rate:0.85});
+    bindMic(w);
+    /* differito: startGame chiama show() DOPO questa funzione, e show()
+       azzera il parlato — uno speak sincrono qui verrebbe tagliato.
+       Alla prima parola Foxy si presenta, poi si va dritti al punto. */
+    setTimeout(()=>{
+      if(i === 0) speak("Répète après moi !", {rate:0.9, noRepeat:true,
+        onEnd: ()=>speak(w.fr, {rate:0.85})});
+      else speak(w.fr, {rate:0.85});
+    }, 400);
+  }
+
+  function bindMic(w){
+    const btn = $("micBtn"), hint = $("repHint");
+    let chunks = [];
+
+    const startRec = async e=>{
+      e.preventDefault();
+      if(recorder) return;
+      stopSpeech();
+      try{
+        if(!micStream) micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+      }catch(err){
+        /* permesso negato: si ripiega sul "ripeti ad alta voce" senza
+           registrazione — il gioco resta giocabile, mai un vicolo cieco */
+        hint.textContent = "Niente microfono? Ripeti a voce alta e tocca ➡️";
+        btn.textContent = "➡️";
+        btn.onpointerdown = null;
+        btn.onclick = ()=>{ sfx.good(); sparkleAt(btn); advance(); };
+        return;
+      }
+      chunks = [];
+      recorder = new MediaRecorder(micStream);
+      recorder.ondataavailable = ev=>{ if(ev.data.size) chunks.push(ev.data); };
+      recorder.onstop = ()=>{
+        recorder = null;
+        btn.classList.remove("recording");
+        if(!chunks.length){ hint.textContent = "Non ho sentito niente… riprova!"; return; }
+        playBack(new Blob(chunks, {type: chunks[0].type || "audio/webm"}));
+      };
+      recorder.start();
+      duckMusic(true);
+      btn.classList.add("recording");
+      hint.textContent = "Ti ascolto… parla!";
+      /* tetto di 5s: un dito dimenticato sul bottone non registra un'ora */
+      recTimer = setTimeout(stopRec, 5000);
+    };
+    const stopRec = ()=>{
+      clearTimeout(recTimer);
+      duckMusic(false);
+      if(recorder && recorder.state === "recording") recorder.stop();
+    };
+
+    const playBack = blob=>{
+      if(micUrl) URL.revokeObjectURL(micUrl);
+      micUrl = URL.createObjectURL(blob);
+      const el = new Audio(micUrl);
+      hint.textContent = "Ecco la tua voce!";
+      btn.classList.add("playing");
+      duckMusic(true);
+      el.onended = el.onerror = ()=>{
+        duckMusic(false);
+        btn.classList.remove("playing");
+        sfx.good(); sparkleAt(btn); foxReact("jump");
+        setTimeout(advance, 500);
+      };
+      el.play().catch(()=>el.onended());
+    };
+
+    const advance = ()=>{
+      results.push("ok");
+      i++;
+      setDots(WORDS, results);
+      setTimeout(playWord, 600);
+    };
+
+    btn.onpointerdown = startRec;
+    btn.onpointerup = btn.onpointerleave = stopRec;
+    btn.oncontextmenu = e=>e.preventDefault();
+  }
+
+  playWord();
 }
 
 /* Memory: tre coppie soltanto (la parola del round più due distrattori),
@@ -504,6 +756,7 @@ function roundMemory(unit, word, p, onDone){
         aperta.b.classList.add("ok"); b.classList.add("ok");
         aperta = null; trovate++;
         if(trovate === trio.length){
+          sparkleAt(b);
           foxReact("jump");
           bumpMiss(unit, word, -1);
           setTimeout(()=> onDone(errori), 1000);

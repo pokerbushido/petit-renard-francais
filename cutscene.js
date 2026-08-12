@@ -13,6 +13,11 @@ function playCutscene(chapter, onDone){
   const region = REGIONS.find(r => r.id === chapter.regionId) || REGIONS[0];
   cutState = {chapter, beat: -1, onDone, token, region};
   $("cutSky").style.background = region.sky;
+  /* due nuvole alla deriva: il cielo della scena respira invece di
+     restare un rettangolo di colore piatto */
+  $("cutSky").innerHTML =
+    '<div class="cut-cloud" style="--ct:12%;--cd:34s"></div>' +
+    '<div class="cut-cloud" style="--ct:34%;--cd:48s;--cs:.6;animation-delay:-20s"></div>';
   $("cutGround").style.background = region.ground;
   show("screen-cutscene");
   nextBeat();

@@ -255,9 +255,13 @@ const AVATARS = ["🦊","🐸","🐼","🦄","🐯","🐙"];
 const GAMES = [
   {id:"explore", emoji:"🔍", name:"Découvre", sub:"Scopri · tocca e ascolta"},
   {id:"find",    emoji:"👂", name:"Trouve !", sub:"Trova · ascolta e tocca"},
+  {id:"catch",   emoji:"🫧", name:"Attrape !", sub:"Acchiappa · scoppia la bolla giusta"},
   {id:"memory",  emoji:"🃏", name:"Mémory",   sub:"Memory · trova le coppie"},
   {id:"read",    emoji:"📖", name:"Lis",      sub:"Leggi · abbina la parola", readerOnly:true},
   {id:"spell",   emoji:"✏️", name:"Écris",    sub:"Scrivi · componi la parola", readerOnly:true},
+  /* freeOnly: mai nei capitoli — il permesso microfono a metà storia
+     spezzerebbe il racconto. Si gioca dal menù del mondo. */
+  {id:"repete",  emoji:"🎤", name:"Répète !", sub:"Ripeti · registra la tua voce", freeOnly:true},
 ];
 const STICKER_THRESHOLD = 6; // stelle nell'unità per vincere la figurina
 

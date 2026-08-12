@@ -59,7 +59,10 @@ function unlockedUnitIds(profile){
 
 function availableGameIds(profile){
   const mode = (profile && profile.mode) || "listen";
-  return GAMES.filter(g => !g.readerOnly || mode === "read").map(g => g.id);
+  return GAMES
+    .filter(g => !g.freeOnly)
+    .filter(g => !g.readerOnly || mode === "read")
+    .map(g => g.id);
 }
 
 /* Ri-proposta in un gioco DIVERSO: è la regola anti-frustrazione
