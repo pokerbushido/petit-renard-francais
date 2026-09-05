@@ -105,38 +105,38 @@ di `speak()`.
 
 Le voci di sistema suonano robotiche. `tools/tts.mjs` genera **una volta sola,
 offline**, una clip per ogni frase dell'app e la salva in `audio/`; il browser
-suona quelle. Girare offline è una scelta di sicurezza, non di comodità: una
-chiave API dentro una pagina pubblica su GitHub Pages sarebbe leggibile — e
-spendibile — da chiunque apra il sorgente.
+suona quelle. La sintesi gira **in locale sul Mac** (Qwen3-TTS su MLX, tramite
+`tools/tts_local.py`): nessun servizio esterno, nessuna chiave, nessun
+abbonamento. Serve `uv` e `ffmpeg`; al primo avvio scarica il modello
+(~2.9 GB in `~/.cache/huggingface`).
 
-    node tools/tts.mjs --count     # quante frasi e quanti caratteri servono
-    node tools/tts.mjs --voices    # elenca le voci del tuo account
-    TTS_VOICE_FR=<id> TTS_VOICE_IT=<id> node tools/tts.mjs
+    node tools/tts.mjs --count     # quante frasi e quanti caratteri
+    node tools/tts.mjs --check     # self-check senza sintesi
+    uv run tools/tts_local.py --check   # genera due clip di prova e le verifica
+    node tools/tts.mjs             # genera le clip mancanti
+    TTS_FILTER='^le chat$' node tools/tts.mjs --force   # rigenera solo alcune
 
-La chiave va in `~/.config/carlo-os/elevenlabs.env`
-(`ELEVENLABS_API_KEY=...`, permessi `600`) oppure in `$ELEVENLABS_API_KEY`.
-**Mai nel repo.** La chiave in uso ha solo *Text to Speech* e lettura voci:
-se trapelasse non potrebbe clonare voci né toccare l'account.
+Due voci, una per lingua, perché la pronuncia è il prodotto. Sono **cloni**
+zero-shot da un campione di riferimento in `tools/voices/` (`fr.wav`+`fr.txt`,
+`it.wav`+`it.txt`, ~8-14 s ricavati dalle clip storiche): la voce francese è
+*Foxy FR* (giovane donna madrelingua, chiara, per bambini), quella italiana è
+la voce narrante di Foxy. Per cambiare voce basta sostituire il wav e la sua
+trascrizione esatta.
 
-Due voci, una per lingua, perché la pronuncia è il prodotto:
+Le clip corte francesi (parole che il bambino imita) vengono campionate più
+"fredde" e rigenerate se la durata sfora il budget: i modelli TTS sui testi
+cortissimi tendono a improvvisare ("eeeeh… la porte").
 
-| | voce | `voice_id` |
-|---|---|---|
-| francese | *Foxy FR*, creata con Voice Design | `MIzJ6RArwnuvlFsl7dOz` |
-| italiano | *Andrea — Young & Expressive* | `mxbgw5PwaQHOrln90mhH` |
-
-> ⚠️ Le voci della Voice Library **non funzionano via API sul piano free**
-> (`402 paid_plan_required`): restano solo voci anglofone, che leggerebbero il
-> francese con accento inglese. Serve un piano a pagamento.
-
-Lo script è idempotente: salta le clip già su disco, quindi se la quota mensile
-finisce a metà basta rilanciarlo il mese dopo. Al termine riscrive
+Lo script è idempotente: salta le clip già su disco. Al termine riscrive
 `audio/index.json`, che elenca solo le clip realmente presenti: quelle mancanti
 tornano automaticamente alla voce di sistema, l'app non si rompe mai.
 
-Stato attuale: 278 clip, ~6.200 caratteri (il piano free ElevenLabs ne dà
-10.000 al mese). Aggiungendo frasi nuove in `app.js` o `chapter.js`, vanno
-aggiunte anche alla lista `HARDCODED` in `tools/tts.mjs`.
+Stato attuale: 297 clip, ~6.500 caratteri. Aggiungendo frasi nuove in `app.js`
+o `chapter.js`, vanno aggiunte anche alla lista `HARDCODED` in `tools/tts.mjs`.
+
+> Storia: fino a settembre 2026 le clip venivano da ElevenLabs (voce *Foxy FR*
+> creata con Voice Design, voce italiana *Andrea*). Le clip in `audio/` generate
+> allora restano valide; il clone locale parte da quelle.
 
 ## Grafica
 

@@ -1,45 +1,35 @@
 #!/usr/bin/env node
 "use strict";
 /* ============================================================
-   TTS OFFLINE — genera le clip vocali con ElevenLabs.
+   TTS OFFLINE — genera le clip vocali in locale (Qwen3-TTS su MLX).
 
-   Gira SUL MAC, mai nel browser: la chiave API non deve finire
-   in una pagina pubblica. Nel repo ci vanno solo gli mp3.
+   Gira SUL MAC: questo script raccoglie le frasi, decide i nomi
+   file e scrive l'indice; la sintesi la fa tools/tts_local.py
+   (avviato qui come worker, un processo per tutta la corsa) con
+   le voci clonate da tools/voices/{fr,it}.wav. Nessun servizio
+   esterno, nessuna chiave. Serve `uv` e `ffmpeg`.
 
      node tools/tts.mjs --count     # quante frasi / quanti caratteri
-     node tools/tts.mjs --voices    # elenca le voci del tuo account
+     node tools/tts.mjs --check     # self-check senza sintesi
      node tools/tts.mjs             # genera i file mancanti
      node tools/tts.mjs --force     # rigenera tutto
+     TTS_FILTER='^le chat$' node tools/tts.mjs --force   # solo alcune
+     TTS_AUDIO_DIR=/tmp/prova node tools/tts.mjs         # prova a vuoto
 
-   Chiave letta da $ELEVENLABS_API_KEY o da
-   ~/.config/carlo-os/elevenlabs.env (riga ELEVENLABS_API_KEY=...).
-
-   È idempotente: salta le clip già presenti in audio/. Se il free
-   tier finisce a metà, si rilancia il mese dopo e riprende da lì.
+   È idempotente: salta le clip già presenti in audio/.
    ============================================================ */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { homedir } from "node:os";
+import { spawn } from "node:child_process";
+import { createInterface } from "node:readline";
 import { createHash } from "node:crypto";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const AUDIO_DIR = join(ROOT, "audio");
+const AUDIO_DIR = process.env.TTS_AUDIO_DIR || join(ROOT, "audio");
 const INDEX_FILE = join(AUDIO_DIR, "index.json");
-
-/* ---------- voci ----------
-   fr: voce creata su misura con Voice Design ("Foxy FR - maestra
-       bambini"): giovane donna francese, calda e vivace, articolazione
-       netta. È la voce che i bambini imitano, quindi è madrelingua.
-   it: "Andrea - Young & Expressive", la voce narrante di Foxy.
-   Sovrascrivibili al volo con TTS_VOICE_FR / TTS_VOICE_IT. */
-const VOICE = {
-  fr: process.env.TTS_VOICE_FR || "MIzJ6RArwnuvlFsl7dOz",
-  it: process.env.TTS_VOICE_IT || "mxbgw5PwaQHOrln90mhH",
-};
-const MODEL = "eleven_multilingual_v2";
-const FORMAT = "mp3_44100_64";          // voce parlata: 64kbps basta e avanza
+const WORKER = join(ROOT, "tools", "tts_local.py");
 
 /* ============================================================
    1 — RACCOLTA FRASI
@@ -108,48 +98,29 @@ function slugFile(lang, text){
 }
 
 /* ============================================================
-   2 — CHIAVE API
+   2 — WORKER DI SINTESI
+   Un solo processo Python per tutta la corsa (il modello ci mette
+   ~10 s a caricarsi). Protocollo: una riga JSON per clip in
+   ingresso, una riga JSON di risposta in uscita, nello stesso ordine.
    ============================================================ */
-function apiKey(){
-  if(process.env.ELEVENLABS_API_KEY) return process.env.ELEVENLABS_API_KEY.trim();
-  const envFile = join(homedir(), ".config/carlo-os/elevenlabs.env");
-  if(existsSync(envFile)){
-    const m = readFileSync(envFile, "utf8").match(/^\s*ELEVENLABS_API_KEY\s*=\s*(.+)$/m);
-    if(m) return m[1].trim().replace(/^["']|["']$/g, "");
-  }
-  throw new Error(
-    "Chiave ElevenLabs non trovata.\n" +
-    "  echo 'ELEVENLABS_API_KEY=sk_...' > ~/.config/carlo-os/elevenlabs.env"
-  );
-}
-
-async function api(path, opts = {}){
-  const res = await fetch(`https://api.elevenlabs.io${path}`, {
-    ...opts,
-    headers: { "xi-api-key": apiKey(), ...(opts.headers || {}) },
+function startWorker(){
+  const proc = spawn("uv", ["run", WORKER], { stdio: ["pipe", "pipe", "inherit"] });
+  const lines = createInterface({ input: proc.stdout });
+  const waiting = [];
+  lines.on("line", line => {
+    if(!line.startsWith("{")) return;              // rumore delle librerie, non una risposta
+    const w = waiting.shift(); if(w) w(JSON.parse(line));
   });
-  if(!res.ok){
-    const body = await res.text().catch(() => "");
-    throw new Error(`ElevenLabs ${res.status} su ${path}: ${body.slice(0, 400)}`);
-  }
-  return res;
+  proc.on("exit", code => { while(waiting.length) waiting.shift()({ ok: false, error: `worker uscito con codice ${code}` }); });
+  return {
+    synth: job => new Promise(resolve => { waiting.push(resolve); proc.stdin.write(JSON.stringify(job) + "\n"); }),
+    close: () => proc.stdin.end(),
+  };
 }
 
 /* ============================================================
    3 — COMANDI
    ============================================================ */
-async function cmdVoices(){
-  const res = await api("/v1/voices");
-  const { voices } = await res.json();
-  console.log(`${voices.length} voci disponibili:\n`);
-  for(const v of voices){
-    const labels = Object.values(v.labels || {}).join(", ");
-    console.log(`  ${v.voice_id}  ${v.name.padEnd(20)} ${labels}`);
-  }
-  console.log("\nScegline una e passala così:");
-  console.log("  TTS_VOICE_FR=<id> TTS_VOICE_IT=<id> node tools/tts.mjs");
-}
-
 function cmdCount(){
   const clips = [...new Map(collectPhrases().map(p => [p.file, p])).values()];
   const byLang = {};
@@ -163,49 +134,16 @@ function cmdCount(){
     total += s.chars;
   }
   console.log(`  ---\n  totale: ${clips.length} clip, ${total} caratteri`);
-  console.log(`  (1 carattere = 1 credito ElevenLabs; il piano Starter ne dà 30.000 al mese)`);
   const missing = clips.filter(p => !existsSync(join(AUDIO_DIR, p.file)));
   console.log(`  già generate: ${clips.length - missing.length} · da generare: ${missing.length}`);
 }
 
 /* Una clip "corta" è una parola o frase-chiave che il bambino deve
-   imitare: va detta pulita e senza esitazioni. Con stability bassa e
-   style alto multilingual_v2 sui testi cortissimi IMPROVVISA — clip da
-   9 secondi con "eeeeh…" davanti a "la porte". Qui la voce viene
-   inchiodata: stability alta, niente style, un previous_text che dà
-   il contesto di lettura scandita. */
+   imitare: va detta pulita e senza esitazioni. Il worker la campiona
+   più "freddo" e rigenera se la durata sfora il budget (i modelli
+   TTS sui testi cortissimi tendono a improvvisare: "eeeeh… la porte"). */
 function isShortFr(phrase){
   return phrase.lang === "fr" && phrase.text.length <= 48;
-}
-async function synth(phrase){
-  const voiceId = VOICE[phrase.lang];
-  if(!voiceId) throw new Error(`Nessuna voce configurata per "${phrase.lang}" (TTS_VOICE_${phrase.lang.toUpperCase()})`);
-  const short = isShortFr(phrase);
-  const res = await api(`/v1/text-to-speech/${voiceId}?output_format=${FORMAT}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      text: phrase.text,
-      model_id: MODEL,
-      ...(short ? { previous_text: "Écoute bien et répète :" } : {}),
-      voice_settings: short
-        ? {
-            stability: 0.9,           // parola secca, zero improvvisazione
-            similarity_boost: 0.8,
-            style: 0,
-            use_speaker_boost: true,
-            speed: 0.9,               // chiara ma senza trascinare
-          }
-        : {
-            stability: 0.5,
-            similarity_boost: 0.8,
-            style: 0.25,              // calore da lettura ad alta voce
-            use_speaker_boost: true,
-            speed: 0.95,
-          },
-    }),
-  });
-  return Buffer.from(await res.arrayBuffer());
 }
 
 async function cmdGenerate({ force, redoShortFr }){
@@ -226,21 +164,21 @@ async function cmdGenerate({ force, redoShortFr }){
   for(const lang of new Set(phrases.map(p => p.lang))) mkdirSync(join(AUDIO_DIR, lang), { recursive: true });
 
   let done = 0, failed = 0;
-  for(const p of todo){
-    try {
-      // seriale, non in parallelo: il free tier consente pochissime
-      // richieste concorrenti e risponde 429 al primo fan-out
-      writeFileSync(join(AUDIO_DIR, p.file), await synth(p));
-      done++;
-      process.stdout.write(`\r  ${done}/${todo.length}  ${p.text.slice(0, 40)}`.padEnd(70));
-    } catch (err) {
-      failed++;
-      console.error(`\n  ✗ "${p.text.slice(0, 40)}": ${err.message}`);
-      if(/quota|401|403/i.test(err.message)){
-        console.error("  Stop: quota esaurita o chiave non valida. I file già scritti restano buoni.");
-        break;
+  if(todo.length){
+    const worker = startWorker();
+    for(const p of todo){
+      // seriale: una GPU, un modello; il worker scrive l'mp3 da sé
+      const r = await worker.synth({ text: p.text, lang: p.lang, out: join(AUDIO_DIR, p.file), short: isShortFr(p) });
+      if(r.ok){
+        done++;
+        process.stdout.write(`\r  ${done}/${todo.length}  ${r.seconds.toFixed(1)}s  ${p.text.slice(0, 40)}`.padEnd(70));
+      } else {
+        failed++;
+        console.error(`\n  ✗ "${p.text.slice(0, 40)}": ${r.error}`);
+        if(/worker uscito/.test(r.error)) break;
       }
     }
+    worker.close();
   }
   console.log(`\nFatte ${done}, fallite ${failed}.`);
   writeIndex(phrases);
@@ -284,8 +222,7 @@ function selfCheck(){
 }
 
 const arg = process.argv[2];
-if(arg === "--voices") await cmdVoices();
-else if(arg === "--count") cmdCount();
+if(arg === "--count") cmdCount();
 else if(arg === "--check") selfCheck();
 else if(arg === "--index") writeIndex(collectPhrases());
 else await cmdGenerate({ force: arg === "--force", redoShortFr: arg === "--redo-short-fr" });
